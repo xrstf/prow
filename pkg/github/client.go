@@ -928,7 +928,7 @@ func (c *client) requestRawWithContext(ctx context.Context, r *request) (int, []
 
 // Retry on transport failures. Retries on 500s, retries after sleep on
 // ratelimit exceeded, and retries 404s a couple times.
-// This function closes the response body iff it also returns an error.
+// This function closes the response body if it also returns an error.
 func (c *client) requestRetry(method, path, accept, org string, body interface{}) (*http.Response, error) {
 	return c.requestRetryWithContext(context.Background(), method, path, accept, org, body)
 }

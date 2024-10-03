@@ -58,6 +58,8 @@ func TestExposeMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed getting metrics: %v", err)
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("response status was not %d but %d", http.StatusOK, resp.StatusCode)
 	}

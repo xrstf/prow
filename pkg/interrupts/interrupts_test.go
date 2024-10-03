@@ -107,9 +107,12 @@ func TestInterrupts(t *testing.T) {
 	ListenAndServe(server, time.Second)
 	// wait for the server to start
 	time.Sleep(100 * time.Millisecond)
-	if _, err := http.Get("http://" + listener.Addr().String()); err != nil {
+
+	resp, err := http.Get("http://" + listener.Addr().String())
+	if err != nil {
 		t.Errorf("could not reach server registered with ListenAndServe(): %v", err)
 	}
+	defer resp.Body.Close()
 
 	var tlsServerCalled bool
 	var tlsServerCancelled bool
@@ -138,9 +141,12 @@ func TestInterrupts(t *testing.T) {
 	client := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 	// wait for the server to start
 	time.Sleep(100 * time.Millisecond)
-	if _, err := client.Get("https://" + tlsListener.Addr().String()); err != nil {
+
+	listenerResp, err := client.Get("https://" + tlsListener.Addr().String())
+	if err != nil {
 		t.Errorf("could not reach server registered with ListenAndServeTLS(): %v", err)
 	}
+	defer listenerResp.Body.Close()
 
 	var intervalCalls int
 	interval := func() time.Duration {

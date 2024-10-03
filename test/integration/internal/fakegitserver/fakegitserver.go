@@ -89,6 +89,8 @@ func (c *Client) SetupRepo(repoSetup RepoSetup) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("got %v response", resp.StatusCode)
 	}

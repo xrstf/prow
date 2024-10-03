@@ -17,13 +17,14 @@ linters-settings:
 
 linters:
   enable:
-  - govet
-  - unused
-  - misspell
-  - ineffassign
-  - staticcheck
-  - gosimple
-  - copyloopvar
+    - bodyclose
+    - copyloopvar
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - unused
   disable-all: true
 
 issues:
