@@ -821,8 +821,6 @@ func (peh *periodicJobHandler) getProwJobSpec(mainConfig prowCfgClient, ircg con
 	// https://github.com/kubernetes/test-infra/issues/21729 is done?
 	for _, job := range mainConfig.AllPeriodics() {
 		if job.Name == cjer.GetJobName() {
-			// Directly followed by break, so this is ok
-			// nolint: exportloopref
 			periodicJob = &job
 			break
 		}
@@ -895,7 +893,6 @@ func (prh *presubmitJobHandler) getProwJobSpec(mainConfig prowCfgClient, ircg co
 	}
 	var headSHAGetters []func() (string, error)
 	for _, pull := range refs.Pulls {
-		pull := pull
 		headSHAGetters = append(headSHAGetters, func() (string, error) {
 			return pull.SHA, nil
 		})
@@ -920,7 +917,6 @@ func (prh *presubmitJobHandler) getProwJobSpec(mainConfig prowCfgClient, ircg co
 	}
 
 	for _, job := range presubmits {
-		job := job
 		if !job.CouldRun(branch) { // filter out jobs that are not branch matching
 			continue
 		}
@@ -988,7 +984,6 @@ func (poh *postsubmitJobHandler) getProwJobSpec(mainConfig prowCfgClient, ircg c
 	}
 
 	for _, job := range postsubmits {
-		job := job
 		if !job.CouldRun(branch) { // filter out jobs that are not branch matching
 			continue
 		}
