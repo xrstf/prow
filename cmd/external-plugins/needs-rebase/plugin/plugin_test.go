@@ -567,7 +567,7 @@ func TestConstructQueries(t *testing.T) {
 func NewFakeCache(validTime time.Duration) *Cache {
 	return &Cache{
 		cache:       make(map[int]time.Time),
-		validTime:   time.Second * validTime,
+		validTime:   validTime,
 		currentTime: getFakeTime(),
 	}
 }
@@ -592,28 +592,28 @@ func TestCache(t *testing.T) {
 	}{
 		{
 			name:      "Test cache - disabled",
-			validTime: 0,
+			validTime: 0 * time.Second,
 
 			keys:     []int{11, 22, 22, 11},
 			expected: []bool{false, false, false, false},
 		},
 		{
 			name:      "Test cache - all miss",
-			validTime: 100,
+			validTime: 100 * time.Second,
 
 			keys:     []int{11, 22, 33, 44},
 			expected: []bool{false, false, false, false},
 		},
 		{
 			name:      "Test cache - one key hits, other missed",
-			validTime: 100,
+			validTime: 100 * time.Second,
 
 			keys:     []int{11, 22, 33, 11},
 			expected: []bool{false, false, false, true},
 		},
 		{
 			name:      "Test cache - repeated requested same key",
-			validTime: 100,
+			validTime: 100 * time.Second,
 
 			keys:     []int{11, 11, 11, 11},
 			expected: []bool{false, true, true, true},
