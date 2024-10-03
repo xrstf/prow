@@ -211,7 +211,7 @@ func processGitHub(ctx context.Context, o *Options, prh PRHandler) error {
 
 	gc, err := github.NewClient(secret.GetTokenGenerator(o.GitHubToken), secret.Censor, github.DefaultGraphQLEndpoint, github.DefaultAPIEndpoint)
 	if err != nil {
-		return fmt.Errorf("failed to construct GitHub client: %v", err)
+		return fmt.Errorf("failed to construct GitHub client: %w", err)
 	}
 
 	if o.GitHubLogin == "" || o.GitName == "" || o.GitEmail == "" {
@@ -618,7 +618,7 @@ func getDiff(prevCommit string) (string, error) {
 	var diffBuf bytes.Buffer
 	var errBuf bytes.Buffer
 	if err := Call(&diffBuf, &errBuf, gitCmd, []string{"diff", prevCommit}); err != nil {
-		return "", fmt.Errorf("diffing previous bump: %v -- %s", err, errBuf.String())
+		return "", fmt.Errorf("diffing previous bump: %w -- %s", err, errBuf.String())
 	}
 	return diffBuf.String(), nil
 }
@@ -628,7 +628,7 @@ func gerritNoOpChange(changeID string) (bool, error) {
 	var outBuf bytes.Buffer
 	// Fetch current pending CRs
 	if err := Call(&garbageBuf, &garbageBuf, gitCmd, []string{"fetch", "upstream", "+refs/changes/*:refs/remotes/upstream/changes/*"}); err != nil {
-		return false, fmt.Errorf("unable to fetch upstream changes: %v -- \nOUTPUT: %s", err, garbageBuf.String())
+		return false, fmt.Errorf("unable to fetch upstream changes: %w -- \nOUTPUT: %s", err, garbageBuf.String())
 	}
 	// Get PR with same ChangeID for this bump
 	if err := Call(&outBuf, &garbageBuf, gitCmd, []string{"log", "--all", fmt.Sprintf("--grep=Change-Id: %s", changeID), "-1", "--format=%H"}); err != nil {

@@ -18,6 +18,7 @@ package resultstore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -138,7 +139,7 @@ func (c *filesCollector) collect(ctx context.Context, prefix, delimiter string) 
 	for {
 		f, err := iter.Next(ctx)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			return err
@@ -178,7 +179,7 @@ func (c *filesCollector) collectDirs(ctx context.Context, prefix string, match f
 	for {
 		f, err := iter.Next(ctx)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			return err

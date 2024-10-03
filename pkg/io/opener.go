@@ -541,7 +541,7 @@ func isErrUnexpected(err error) bool {
 		return false
 	}
 	// Precondition Failed is expected and we can silently ignore it.
-	if e, ok := err.(*googleapi.Error); ok {
+	if e := (&googleapi.Error{}); errors.As(err, &e) {
 		if e.Code == http.StatusPreconditionFailed {
 			return false
 		}

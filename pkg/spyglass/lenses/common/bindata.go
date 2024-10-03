@@ -106,7 +106,7 @@ func Asset(name string) ([]byte, error) {
 	if f, ok := _bindata[cannonicalName]; ok {
 		a, err := f()
 		if err != nil {
-			return nil, fmt.Errorf("Asset %s can't read by error: %v", name, err)
+			return nil, fmt.Errorf("cannot read Asset %s: %w", name, err)
 		}
 		return a.bytes, nil
 	}

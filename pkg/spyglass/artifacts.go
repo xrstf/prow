@@ -18,6 +18,7 @@ package spyglass
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -54,7 +55,7 @@ func (s *Spyglass) ListArtifacts(ctx context.Context, src string) ([]string, err
 	artifactNames, err := s.StorageArtifactFetcher.artifacts(ctx, gcsKey)
 	// Don't care errors that are not supposed logged as http errors, for example
 	// context cancelled error due to user cancelled request.
-	if err != nil && err != context.Canceled {
+	if err != nil && !errors.Is(err, context.Canceled) {
 		if config.IsNotAllowedBucketError(err) {
 			logrus.WithError(err).WithField("gcs-key", gcsKey).Debug("error retrieving artifact names from gcs storage")
 		} else {

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"testing"
@@ -256,12 +257,12 @@ func TestReadAtMost(t *testing.T) {
 		}, "", "build-log.txt", 500e6)
 		actualBytes, err := artifact.ReadAtMost(tc.n)
 		if err != nil && !tc.expectErr {
-			if tc.expectEOF && err != io.EOF {
+			if tc.expectEOF && !errors.Is(err, io.EOF) {
 				t.Fatalf("Test %s failed with err: %v, expected EOF", tc.name, err)
 			}
 			t.Fatalf("Test %s failed with err: %v", tc.name, err)
 		}
-		if err != nil && tc.expectEOF && err != io.EOF {
+		if err != nil && tc.expectEOF && !errors.Is(err, io.EOF) {
 			t.Fatalf("Test %s failed with err: %v, expected EOF", tc.name, err)
 		}
 		if err == nil && tc.expectErr {

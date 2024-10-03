@@ -46,7 +46,7 @@ var (
 )
 
 func IsErrProwJobNotFound(err error) bool {
-	return err == errProwjobNotFound
+	return errors.Is(err, errProwjobNotFound)
 }
 
 // Job holds information about a job prow is running/has run.

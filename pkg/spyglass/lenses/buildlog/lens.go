@@ -339,7 +339,7 @@ func analyzeArtifact(artifact api.Artifact, conf *parsedConfig) (*highlightRespo
 	}
 	u, err := url.Parse(link)
 	if err != nil {
-		return nil, fmt.Errorf("parse artifact link %q: %v", link, err)
+		return nil, fmt.Errorf("parse artifact link %q: %w", link, err)
 	}
 	log := logrus.WithFields(logrus.Fields{
 		"artifact": link,
@@ -486,12 +486,12 @@ func logLinesAll(artifact api.Artifact) ([]string, error) {
 func logLines(artifact api.Artifact, offset, length int64) ([]string, error) {
 	b := make([]byte, length)
 	_, err := artifact.ReadAt(b, offset)
-	if err != nil && err != io.EOF {
-		if err != lenses.ErrGzipOffsetRead {
+	if err != nil && !errors.Is(err, io.EOF) {
+		if !errors.Is(err, lenses.ErrGzipOffsetRead) {
 			return nil, fmt.Errorf("couldn't read requested bytes: %w", err)
 		}
 		moreBytes, err := artifact.ReadAtMost(offset + length)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return nil, fmt.Errorf("couldn't handle reading gzipped file: %w", err)
 		}
 		b = moreBytes[offset:]

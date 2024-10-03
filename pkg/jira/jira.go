@@ -688,11 +688,8 @@ func JiraErrorStatusCode(err error) int {
 	if jiraErr := (&JiraError{}); errors.As(err, &jiraErr) {
 		return jiraErr.StatusCode
 	}
-	jiraErr, ok := err.(*JiraError)
-	if !ok {
-		return -1
-	}
-	return jiraErr.StatusCode
+
+	return -1
 }
 
 // JiraErrorBody will identify if an error is a JiraError and return the stored
@@ -701,11 +698,8 @@ func JiraErrorBody(err error) string {
 	if jiraErr := (&JiraError{}); errors.As(err, &jiraErr) {
 		return jiraErr.Body
 	}
-	jiraErr, ok := err.(*JiraError)
-	if !ok {
-		return ""
-	}
-	return jiraErr.Body
+
+	return ""
 }
 
 // HandleJiraError collapses cryptic Jira errors to include response
@@ -794,10 +788,10 @@ func GetUnknownField(field string, issue *jira.Issue, fn func() interface{}) err
 	}
 	bytes, err := json.Marshal(unknownField)
 	if err != nil {
-		return fmt.Errorf("failed to process the custom field %s. Error : %v", field, err)
+		return fmt.Errorf("failed to process the custom field %s. Error: %w", field, err)
 	}
 	if err := json.Unmarshal(bytes, obj); err != nil {
-		return fmt.Errorf("failed to unmarshall the json to struct for %s. Error: %v", field, err)
+		return fmt.Errorf("failed to unmarshal the json to struct for %s. Error: %w", field, err)
 	}
 	return err
 

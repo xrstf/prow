@@ -44,7 +44,7 @@ type Client struct {
 func NewClient(projectID, pubsubEmulatorHost string) (*Client, error) {
 	client, err := newClientForEmulator(projectID, pubsubEmulatorHost)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create pubsub client to project %q for the emulator: %v", projectID, err)
+		return nil, fmt.Errorf("unable to create pubsub client to project %q for the emulator: %w", projectID, err)
 	}
 
 	return &Client{
@@ -79,7 +79,7 @@ func newClientForEmulator(projectID, pubsubEmulatorHost string) (*pubsub.Client,
 func (c *Client) PublishMessage(ctx context.Context, msg PubSubMessageForSub, topicID string) error {
 	bytes, err := json.Marshal(msg.Data)
 	if err != nil {
-		return fmt.Errorf("failed to marshal: %v", err)
+		return fmt.Errorf("failed to marshal: %w", err)
 	}
 
 	t := c.pubsubClient.Topic(topicID)
@@ -87,7 +87,7 @@ func (c *Client) PublishMessage(ctx context.Context, msg PubSubMessageForSub, to
 
 	id, err := result.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to publish: %v", err)
+		return fmt.Errorf("failed to publish: %w", err)
 	}
 
 	logrus.Infof("successfully published message %v; msg ID: %v", string(bytes), id)

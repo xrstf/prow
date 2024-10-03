@@ -43,28 +43,28 @@ func newGCPClient(client *secretmanager.Client, secretID string) *GCPClient {
 func (g *GCPClient) CreateSecret(ctx context.Context, secretID string) error {
 	_, err := g.client.CreateSecret(ctx, secretID)
 	if err != nil {
-		return fmt.Errorf("could not create secret %v", err)
+		return fmt.Errorf("could not create secret: %w", err)
 	}
 	return nil
 }
 
 func (g *GCPClient) AddSecretVersion(ctx context.Context, secretName string, payload []byte) error {
 	if err := g.client.AddSecretVersion(ctx, secretName, payload); err != nil {
-		return fmt.Errorf("could not add secret data %v", err)
+		return fmt.Errorf("could not add secret data: %w", err)
 	}
 	return nil
 }
 
 func (g *GCPClient) GetSecretValue(ctx context.Context, secretName string, versionName string) ([]byte, bool, error) {
 	err := g.checkSecret(ctx, secretName)
-	if err != nil && err == os.ErrNotExist {
+	if err != nil && errors.Is(err, os.ErrNotExist) {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
 	}
 	payload, err := g.client.GetSecretValue(ctx, secretName, versionName)
 	if err != nil {
-		return nil, false, fmt.Errorf("error getting secret value %v", err)
+		return nil, false, fmt.Errorf("error getting secret value: %w", err)
 	}
 
 	return payload, true, nil
@@ -73,7 +73,7 @@ func (g *GCPClient) GetSecretValue(ctx context.Context, secretName string, versi
 func (g *GCPClient) checkSecret(ctx context.Context, secretName string) error {
 	res, err := g.client.ListSecrets(ctx)
 	if err != nil {
-		return fmt.Errorf("could not make call to list secrets successfully %v", err)
+		return fmt.Errorf("could not make call to list secrets successfully: %w", err)
 	}
 	for _, secret := range res {
 		if strings.Contains(secret.Name, g.secretID) {
@@ -102,7 +102,7 @@ func (l *localFSClient) CreateSecret(ctx context.Context, secretID string) error
 	if _, err := os.Stat(l.path); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(l.path, 0755)
 		if err != nil {
-			return fmt.Errorf("unable to create secret dir %v", err)
+			return fmt.Errorf("unable to create secret dir: %w", err)
 		}
 	}
 	return nil
@@ -131,7 +131,7 @@ func (l *localFSClient) AddSecretVersion(ctx context.Context, secretName string,
 
 func (l *localFSClient) GetSecretValue(ctx context.Context, secretName string, versionName string) ([]byte, bool, error) {
 	err := l.checkSecret(ctx, secretName)
-	if err != nil && err == os.ErrNotExist {
+	if err != nil && errors.Is(err, os.ErrNotExist) {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
@@ -144,7 +144,7 @@ func (l *localFSClient) GetSecretValue(ctx context.Context, secretName string, v
 	for _, f := range files {
 		content, err := os.ReadFile(filepath.Join(l.path, f.Name()))
 		if err != nil {
-			return nil, false, fmt.Errorf("error reading file %v", err)
+			return nil, false, fmt.Errorf("error reading file: %w", err)
 		}
 		switch f.Name() {
 		case certFile:
@@ -157,7 +157,7 @@ func (l *localFSClient) GetSecretValue(ctx context.Context, secretName string, v
 	}
 	res, err := json.Marshal(secretsMap)
 	if err != nil {
-		return nil, false, fmt.Errorf("could not marshal secrets data %v", err)
+		return nil, false, fmt.Errorf("could not marshal secrets data: %w", err)
 	}
 	return res, true, nil
 }
@@ -180,7 +180,7 @@ func (l *localFSClient) checkSecret(ctx context.Context, secretName string) erro
 	for _, f := range files {
 		_, err := os.ReadFile(filepath.Join(l.path, f.Name()))
 		if err != nil {
-			return fmt.Errorf("error reading file %v", err)
+			return fmt.Errorf("error reading file: %w", err)
 		}
 	}
 	return nil

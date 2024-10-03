@@ -813,7 +813,7 @@ func TestGetProwYAMLCachedAndDefaulted(t *testing.T) {
 				errGroup.Go(func() error {
 					presubmits, err := cache.GetPresubmits(identifier, baseBranch, baseSHAGetter, headSHAGetters...)
 					if err != nil {
-						return fmt.Errorf("Expected error 'nil' got '%v'", err.Error())
+						return fmt.Errorf("Expected error 'nil' got '%w'", err)
 					}
 					if diff := cmp.Diff(tc.expectedBefore.presubmits, presubmits, cmpopts.IgnoreUnexported(Presubmit{}, Brancher{}, RegexpChangeMatcher{})); diff != "" {
 						return fmt.Errorf("(before Config reload) presubmits mismatch (-want +got):\n%s", diff)
@@ -824,7 +824,7 @@ func TestGetProwYAMLCachedAndDefaulted(t *testing.T) {
 				errGroup.Go(func() error {
 					postsubmits, err := cache.GetPostsubmits(identifier, baseBranch, baseSHAGetter, headSHAGetters...)
 					if err != nil {
-						return fmt.Errorf("Expected error 'nil' got '%v'", err.Error())
+						return fmt.Errorf("Expected error 'nil' got '%w'", err)
 					}
 
 					if diff := cmp.Diff(tc.expectedBefore.postsubmits, postsubmits, cmpopts.IgnoreUnexported(Postsubmit{}, Brancher{}, RegexpChangeMatcher{})); diff != "" {

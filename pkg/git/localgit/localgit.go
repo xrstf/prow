@@ -60,7 +60,7 @@ func runCmd(cmd, dir string, arg ...string) error {
 	c := exec.Command(cmd, arg...)
 	c.Dir = dir
 	if b, err := c.CombinedOutput(); err != nil {
-		return fmt.Errorf("%s %v: %v, %s", cmd, arg, err, string(b))
+		return fmt.Errorf("%s %v: %w, %s", cmd, arg, err, string(b))
 	}
 	return nil
 }
@@ -70,7 +70,7 @@ func runCmdOutput(cmd, dir string, arg ...string) (string, error) {
 	c.Dir = dir
 	b, err := c.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("%s %v: %v, %s", cmd, arg, err, string(b))
+		return "", fmt.Errorf("%s %v: %w, %s", cmd, arg, err, string(b))
 	}
 	return strings.TrimSpace(string(b)), nil
 }

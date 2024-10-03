@@ -45,6 +45,7 @@ package genfiles
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -78,12 +79,11 @@ func NewGroup(gc ghFileClient, owner, repo, sha string) (*Group, error) {
 
 	bs, err := gc.GetFile(owner, repo, genConfigFile, sha)
 	if err != nil {
-		switch err.(type) {
-		case *github.FileNotFound:
+		if notFound := (&github.FileNotFound{}); errors.As(err, &notFound) {
 			return g, nil
-		default:
-			return nil, fmt.Errorf("could not get .generated_files: %w", err)
 		}
+
+		return nil, fmt.Errorf("could not get .generated_files: %w", err)
 	}
 
 	repoFiles, err := g.load(bytes.NewBuffer(bs))

@@ -127,13 +127,13 @@ func TestGerrit(t *testing.T) {
 				t.Fatalf("failed to add branch to server: %v", err)
 			}
 			if err = addAccountToServer(account); err != nil {
-				t.Fatalf("Failed to add change to server: %s", err)
+				t.Fatalf("Failed to add change to server: %v", err)
 			}
 			if err = login(account.AccountID); err != nil {
-				t.Fatalf("Failed to set self on server: %s", err)
+				t.Fatalf("Failed to set self on server: %v", err)
 			}
 			if err = addChangeToServer(tc.change, tc.change.Project); err != nil {
-				t.Fatalf("Failed to add change to server: %s", err)
+				t.Fatalf("Failed to add change to server: %v", err)
 
 			}
 

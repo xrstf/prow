@@ -504,7 +504,7 @@ func (cjer *CreateJobExecutionRequest) Validate() error {
 			return fmt.Errorf("gitRefs must be defined for %q", jobExecutionType)
 		}
 		if err := gitRefs.Validate(); err != nil {
-			return fmt.Errorf("gitRefs: failed to validate: %s", err)
+			return fmt.Errorf("gitRefs: failed to validate: %w", err)
 		}
 	}
 

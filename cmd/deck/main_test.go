@@ -255,7 +255,7 @@ func TestHandleLog(t *testing.T) {
 				var buf bytes.Buffer
 				for {
 					line, err := reader.ReadBytes('\n')
-					if err == io.EOF {
+					if errors.Is(err, io.EOF) {
 						break
 					}
 					if err != nil {

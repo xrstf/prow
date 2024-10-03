@@ -65,7 +65,7 @@ func (f *FakeClient) GetIssue(id string) (*jira.Issue, error) {
 func (f *FakeClient) GetRemoteLinks(id string) ([]jira.RemoteLink, error) {
 	issue, err := f.GetIssue(id)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get issue when checking from remote links: %+v", err)
+		return nil, fmt.Errorf("failed to get issue when checking from remote links: %w", err)
 	}
 	return append(f.ExistingLinks[issue.ID], f.ExistingLinks[issue.Key]...), nil
 }
@@ -114,7 +114,7 @@ func (f *FakeClient) ForPlugin(string) jiraclient.Client {
 func (f *FakeClient) AddComment(issueID string, comment *jira.Comment) (*jira.Comment, error) {
 	issue, err := f.GetIssue(issueID)
 	if err != nil {
-		return nil, fmt.Errorf("Issue %s not found: %v", issueID, err)
+		return nil, fmt.Errorf("Issue %s not found: %w", issueID, err)
 	}
 	// make sure the fields exist
 	if issue.Fields == nil {
@@ -130,7 +130,7 @@ func (f *FakeClient) AddComment(issueID string, comment *jira.Comment) (*jira.Co
 func (f *FakeClient) CreateIssueLink(link *jira.IssueLink) error {
 	outward, err := f.GetIssue(link.OutwardIssue.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get outward link issue: %v", err)
+		return fmt.Errorf("failed to get outward link issue: %w", err)
 	}
 	// when part of an issue struct, the issue link type does not include the
 	// short definition of the issue it is in
@@ -139,7 +139,7 @@ func (f *FakeClient) CreateIssueLink(link *jira.IssueLink) error {
 	outward.Fields.IssueLinks = append(outward.Fields.IssueLinks, &linkForOutward)
 	inward, err := f.GetIssue(link.InwardIssue.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get inward link issue: %v", err)
+		return fmt.Errorf("failed to get inward link issue: %w", err)
 	}
 	linkForInward := *link
 	linkForInward.InwardIssue = nil
@@ -202,7 +202,7 @@ func (f *FakeClient) DeleteLink(id string) error {
 	}
 	outward, err := f.GetIssue(link.OutwardIssue.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get outward link issue: %v", err)
+		return fmt.Errorf("failed to get outward link issue: %w", err)
 	}
 	outwardIssueIndex := -1
 	for index, currLink := range outward.Fields.IssueLinks {
@@ -217,7 +217,7 @@ func (f *FakeClient) DeleteLink(id string) error {
 	}
 	inward, err := f.GetIssue(link.InwardIssue.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get inward link issue: %v", err)
+		return fmt.Errorf("failed to get inward link issue: %w", err)
 	}
 	inwardIssueIndex := -1
 	for index, currLink := range inward.Fields.IssueLinks {
@@ -262,7 +262,7 @@ func (f *FakeClient) GetTransitions(issueID string) ([]jira.Transition, error) {
 func (f *FakeClient) DoTransition(issueID, transitionID string) error {
 	issue, err := f.GetIssue(issueID)
 	if err != nil {
-		return fmt.Errorf("could not find issue: %v", err)
+		return fmt.Errorf("could not find issue: %w", err)
 	}
 	var correctTransition *jira.Transition
 	for index, transition := range f.Transitions {
@@ -315,35 +315,35 @@ func (f *FakeClient) UpdateIssue(issue *jira.Issue) (*jira.Issue, error) {
 	}
 	retrievedIssue, err := f.GetIssue(issue.Key)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find issue to update: %v", err)
+		return nil, fmt.Errorf("unable to find issue to update: %w", err)
 	}
 	// convert `fields` field of both retrieved and provided issue to interfaces and update the non-nil
 	// fields from the provided issue to the retrieved one
 	var issueFields, retrievedFields map[string]interface{}
 	issueBytes, err := json.Marshal(issue.Fields)
 	if err != nil {
-		return nil, fmt.Errorf("error converting provided issue to json: %v", err)
+		return nil, fmt.Errorf("error converting provided issue to json: %w", err)
 	}
 	if err := json.Unmarshal(issueBytes, &issueFields); err != nil {
-		return nil, fmt.Errorf("failed converting provided issue to map: %v", err)
+		return nil, fmt.Errorf("failed converting provided issue to map: %w", err)
 	}
 	retrievedIssueBytes, err := json.Marshal(retrievedIssue.Fields)
 	if err != nil {
-		return nil, fmt.Errorf("error converting original issue to json: %v", err)
+		return nil, fmt.Errorf("error converting original issue to json: %w", err)
 	}
 	if err := json.Unmarshal(retrievedIssueBytes, &retrievedFields); err != nil {
-		return nil, fmt.Errorf("failed converting original issue to map: %v", err)
+		return nil, fmt.Errorf("failed converting original issue to map: %w", err)
 	}
 	for key, value := range issueFields {
 		retrievedFields[key] = value
 	}
 	updatedIssueBytes, err := json.Marshal(retrievedFields)
 	if err != nil {
-		return nil, fmt.Errorf("error converting updated issue to json: %v", err)
+		return nil, fmt.Errorf("error converting updated issue to json: %w", err)
 	}
 	var newFields jira.IssueFields
 	if err := json.Unmarshal(updatedIssueBytes, &newFields); err != nil {
-		return nil, fmt.Errorf("failed converting updated issue to struct: %v", err)
+		return nil, fmt.Errorf("failed converting updated issue to struct: %w", err)
 	}
 	retrievedIssue.Fields = &newFields
 	return retrievedIssue, nil

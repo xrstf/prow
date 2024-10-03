@@ -501,7 +501,7 @@ func (c *syncController) Sync() error {
 	if len(prs) > 0 {
 		blocks, err = c.provider.blockers()
 		if err != nil {
-			return fmt.Errorf("failed getting blockers: %v", err)
+			return fmt.Errorf("failed getting blockers: %w", err)
 		}
 	}
 	// Partition PRs into subpools and filter out non-pool PRs.
@@ -1314,13 +1314,13 @@ func tryMerge(mergeFunc func() error) (bool, error) {
 		// Note: We would also need to be able to roll back any merges for the
 		// batch that were already successfully completed before the failure.
 		// Ref: https://github.com/kubernetes/test-infra/issues/10621
-		if _, ok := err.(github.ModifiedHeadError); ok {
+		if test := github.ModifiedHeadError(""); errors.As(err, &test) {
 			// This is a possible source of incorrect behavior. If someone
 			// modifies their PR as we try to merge it in a batch then we
 			// end up in an untested state. This is unlikely to cause any
 			// real problems.
 			return true, fmt.Errorf("PR was modified: %w", err)
-		} else if _, ok = err.(github.UnmergablePRBaseChangedError); ok {
+		} else if test := github.UnmergablePRBaseChangedError(""); errors.As(err, &test) {
 			//  complained that the base branch was modified. This is a
 			// strange error because the API doesn't even allow the request to
 			// specify the base branch sha, only the head sha.
@@ -1334,20 +1334,20 @@ func tryMerge(mergeFunc func() error) (bool, error) {
 				sleep(backoff)
 				backoff *= 2
 			}
-		} else if _, ok = err.(github.UnauthorizedToPushError); ok {
+		} else if test := github.UnauthorizedToPushError(""); errors.As(err, &test) {
 			// GitHub let us know that the token used cannot push to the branch.
 			// Even if the robot is set up to have write access to the repo, an
 			// overzealous branch protection setting will not allow the robot to
 			// push to a specific branch.
 			// We won't be able to merge the other PRs.
 			return false, fmt.Errorf("branch needs to be configured to allow this robot to push: %w", err)
-		} else if _, ok = err.(github.MergeCommitsForbiddenError); ok {
+		} else if test := github.MergeCommitsForbiddenError(""); errors.As(err, &test) {
 			// GitHub let us know that the merge method configured for this repo
 			// is not allowed by other repo settings, so we should let the admins
 			// know that the configuration needs to be updated.
 			// We won't be able to merge the other PRs.
 			return false, fmt.Errorf("Tide needs to be configured to use the 'rebase' merge method for this repo or the repo needs to allow merge commits: %w", err)
-		} else if _, ok = err.(github.UnmergablePRError); ok {
+		} else if test := github.UnmergablePRError(""); errors.As(err, &test) {
 			return true, fmt.Errorf("PR is unmergable. Do the Tide merge requirements match the GitHub settings for the repo? %w", err)
 		} else {
 			return true, err
@@ -1360,7 +1360,7 @@ func tryMerge(mergeFunc func() error) (bool, error) {
 func (c *syncController) trigger(sp subpool, presubmits []config.Presubmit, prs []CodeReviewCommon) error {
 	refs, err := c.provider.refsForJob(sp, prs)
 	if err != nil {
-		return fmt.Errorf("failed creating refs: %v", err)
+		return fmt.Errorf("failed creating refs: %w", err)
 	}
 
 	// If PRs require the same job, we only want to trigger it once.

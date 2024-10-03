@@ -458,7 +458,7 @@ func TestRerun(t *testing.T) {
 			lastErr = nil
 			res, err := http.DefaultClient.Do(req)
 			if err != nil {
-				lastErr = fmt.Errorf("could not make post request %v", err)
+				lastErr = fmt.Errorf("could not make post request: %w", err)
 				res.Body.Close()
 				break
 			}
@@ -472,7 +472,7 @@ func TestRerun(t *testing.T) {
 			}
 			body, err := io.ReadAll(res.Body)
 			if err != nil {
-				lastErr = fmt.Errorf("could not read body response %v", err)
+				lastErr = fmt.Errorf("could not read response body: %w", err)
 				res.Body.Close()
 				break
 			}

@@ -84,11 +84,11 @@ func (f *fakeGerritClient) SubmitChange(instance, id string, wait bool) (*gerrit
 func (f *fakeGerritClient) SetReview(instance, id, revision, message string, _ map[string]string) error {
 	change, err := f.GetChange(instance, id)
 	if err != nil {
-		return fmt.Errorf("change not found: %v", err)
+		return fmt.Errorf("change not found: %w", err)
 	}
 	revNum, err := strconv.Atoi(revision)
 	if err != nil {
-		return fmt.Errorf("failed converting revision '%s' to int: %v", revision, err)
+		return fmt.Errorf("failed converting revision '%s' to int: %w", revision, err)
 	}
 	change.Messages = append(change.Messages, gerrit.ChangeMessageInfo{
 		RevisionNumber: revNum,
@@ -309,15 +309,16 @@ func TestQuery(t *testing.T) {
 }
 
 func TestBlocker(t *testing.T) {
+	expected := blockers.Blockers{}
+
 	fc := &GerritProvider{}
-	want := blockers.Blockers{}
-	var wantErr error
-	got, gotErr := fc.blockers()
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Blocker mismatch. Want(-), got(+):\n%s", diff)
+	blockers, err := fc.blockers()
+	if err != nil {
+		t.Fatalf("Reveiced error: %v", err)
 	}
-	if wantErr != gotErr {
-		t.Errorf("Error mismatch. Want: %v, got: %v", wantErr, gotErr)
+
+	if diff := cmp.Diff(expected, blockers); diff != "" {
+		t.Errorf("Blocker mismatch. Want(-), got(+):\n%s", diff)
 	}
 }
 
@@ -347,7 +348,7 @@ func TestIsAllowedToMerge(t *testing.T) {
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("Blocker mismatch. Want(-), got(+):\n%s", diff)
 			}
-			if tc.wantErr != gotErr {
+			if !errors.Is(gotErr, tc.wantErr) {
 				t.Errorf("Error mismatch. Want: %v, got: %v", tc.wantErr, gotErr)
 			}
 		})
@@ -587,7 +588,7 @@ func TestGerritHeadContexts(t *testing.T) {
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("Blocker mismatch. Want(-), got(+):\n%s", diff)
 			}
-			if tc.wantErr != gotErr {
+			if !errors.Is(gotErr, tc.wantErr) {
 				t.Errorf("Error mismatch. Want: %v, got: %v", tc.wantErr, gotErr)
 			}
 		})
@@ -815,7 +816,7 @@ func TestGetTideContextPolicy(t *testing.T) {
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("Blocker mismatch. Want(-), got(+):\n%s", diff)
 			}
-			if tc.wantErr != gotErr {
+			if !errors.Is(gotErr, tc.wantErr) {
 				t.Errorf("Error mismatch. Want: %v, got: %v", tc.wantErr, gotErr)
 			}
 		})

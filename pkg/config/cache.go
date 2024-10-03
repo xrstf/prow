@@ -436,7 +436,7 @@ func (cache *InRepoConfigCache) get(
 
 	key, err := keyParts.CacheKey()
 	if err != nil {
-		return nil, fmt.Errorf("converting CacheKeyParts to CacheKey: %v", err)
+		return nil, fmt.Errorf("converting CacheKeyParts to CacheKey: %w", err)
 	}
 
 	now := time.Now()

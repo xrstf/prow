@@ -241,13 +241,12 @@ func main() {
 	}
 
 	if err := validate(o); err != nil {
-		switch e := err.(type) {
-		case utilerrors.Aggregate:
-			reportWarning(o.strict, e)
-		default:
+		var agg utilerrors.Aggregate
+		if errors.Is(err, agg) {
+			reportWarning(o.strict, agg)
+		} else {
 			logrus.WithError(err).Fatal("Validation failed")
 		}
-
 	} else {
 		logrus.Info("checkconfig passes without any error!")
 	}
@@ -1048,7 +1047,7 @@ func verifyOwnersPresence(cfg *plugins.Configuration, rc FileInRepoExistsChecker
 				continue
 			}
 			if _, err := rc.GetFile(repo.Owner.Login, repo.Name, "OWNERS", ""); err != nil {
-				if _, nf := err.(*github.FileNotFound); nf {
+				if nf := (&github.FileNotFound{}); errors.As(err, &nf) {
 					missing = append(missing, repo.FullName)
 				} else {
 					return fmt.Errorf("got error: %w", err)
@@ -1063,7 +1062,7 @@ func verifyOwnersPresence(cfg *plugins.Configuration, rc FileInRepoExistsChecker
 			return fmt.Errorf("bad repository '%s', expected org/repo format", repo)
 		}
 		if _, err := rc.GetFile(items[0], items[1], "OWNERS", ""); err != nil {
-			if _, nf := err.(*github.FileNotFound); nf {
+			if nf := (&github.FileNotFound{}); errors.As(err, &nf) {
 				missing = append(missing, repo)
 			} else {
 				return fmt.Errorf("got error: %w", err)

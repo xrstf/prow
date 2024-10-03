@@ -27,7 +27,7 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	apiv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/prow/pkg/apis/prowjobs/v1"
+	v1 "sigs.k8s.io/prow/pkg/apis/prowjobs/v1"
 	"sigs.k8s.io/prow/pkg/config"
 )
 
@@ -107,11 +107,11 @@ func generateMutatingPatch(prowJob *v1.ProwJob, plank config.Plank) ([]byte, err
 	prowJobCopy.Spec.DecorationConfig = prowJobCopy.Spec.DecorationConfig.ApplyDefault(defDecorationConfig)
 	originalProwJobJSON, err := json.Marshal(prowJob)
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal prowjob %v", err)
+		return nil, fmt.Errorf("unable to marshal prowjob: %w", err)
 	}
 	mutatedProwJobJSON, err := json.Marshal(prowJobCopy)
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal prowjob %v", err)
+		return nil, fmt.Errorf("unable to marshal prowjob: %w", err)
 	}
 	patch, err := jsonpatch.CreatePatch(originalProwJobJSON, mutatedProwJobJSON)
 	if err != nil {

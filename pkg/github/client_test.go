@@ -1140,7 +1140,7 @@ func TestAssignIssue(t *testing.T) {
 	}
 	if err := c.AssignIssue("k8s", "kuber", 5, []string{"george", "jungle", "not-in-the-org"}); err == nil {
 		t.Errorf("Expected an error")
-	} else if merr, ok := err.(MissingUsers); ok {
+	} else if merr := (MissingUsers{}); errors.As(err, &merr) {
 		if len(merr.Users) != 1 || merr.Users[0] != "not-in-the-org" {
 			t.Errorf("Expected [not-in-the-org], not %v", merr.Users)
 		}
@@ -1189,7 +1189,7 @@ func TestUnassignIssue(t *testing.T) {
 	}
 	if err := c.UnassignIssue("k8s", "kuber", 5, []string{"george", "jungle", "perma-assignee"}); err == nil {
 		t.Errorf("Expected an error")
-	} else if merr, ok := err.(ExtraUsers); ok {
+	} else if merr := (ExtraUsers{}); errors.As(err, &merr) {
 		if len(merr.Users) != 1 || merr.Users[0] != "perma-assignee" {
 			t.Errorf("Expected [perma-assignee], not %v", merr.Users)
 		}
@@ -1450,7 +1450,7 @@ func TestRequestReview(t *testing.T) {
 	}
 	if err := c.RequestReview("k8s", "kuber", 5, []string{"george", "jungle", "not-a-collaborator"}); err == nil {
 		t.Errorf("Expected an error")
-	} else if merr, ok := err.(MissingUsers); ok {
+	} else if merr := (MissingUsers{}); errors.As(err, &merr) {
 		if len(merr.Users) != 1 || merr.Users[0] != "not-a-collaborator" {
 			t.Errorf("Expected [not-a-collaborator], not %v", merr.Users)
 		}
@@ -1463,7 +1463,7 @@ func TestRequestReview(t *testing.T) {
 	}
 	if err := c.RequestReview("k8s", "kuber", 5, []string{"george", "jungle", "notk8s/team1"}); err == nil {
 		t.Errorf("Expected an error")
-	} else if merr, ok := err.(MissingUsers); ok {
+	} else if merr := (MissingUsers{}); errors.As(err, &merr) {
 		if len(merr.Users) != 1 || merr.Users[0] != "notk8s/team1" {
 			t.Errorf("Expected [notk8s/team1], not %v", merr.Users)
 		}
@@ -1515,7 +1515,7 @@ func TestUnrequestReview(t *testing.T) {
 	}
 	if err := c.UnrequestReview("k8s", "kuber", 5, []string{"george", "jungle", "perma-reviewer"}); err == nil {
 		t.Errorf("Expected an error")
-	} else if merr, ok := err.(ExtraUsers); ok {
+	} else if merr := (ExtraUsers{}); errors.As(err, &merr) {
 		if len(merr.Users) != 1 || merr.Users[0] != "perma-reviewer" {
 			t.Errorf("Expected [perma-reviewer], not %v", merr.Users)
 		}

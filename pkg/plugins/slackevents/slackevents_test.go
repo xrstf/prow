@@ -75,7 +75,7 @@ func TestPush(t *testing.T) {
 
 	var pushEv github.PushEvent
 	if err := json.Unmarshal([]byte(pushStr), &pushEv); err != nil {
-		t.Fatalf("Failed to parse Push Notification: %s", err)
+		t.Fatalf("Failed to parse Push Notification: %v", err)
 	}
 
 	// Non bot user merged the PR
@@ -187,7 +187,7 @@ func TestPush(t *testing.T) {
 	//should not fail if slackClient is nil
 	for _, tc := range testcases {
 		if err := notifyOnSlackIfManualMerge(pc, tc.pushReq); err != nil {
-			t.Fatalf("Didn't expect error if slack client is nil: %s", err)
+			t.Fatalf("Didn't expect error if slack client is nil: %v", err)
 		}
 	}
 
@@ -199,7 +199,7 @@ func TestPush(t *testing.T) {
 		pc.SlackClient = slackClient
 
 		if err := notifyOnSlackIfManualMerge(pc, tc.pushReq); err != nil {
-			t.Fatalf("Didn't expect error: %s", err)
+			t.Fatalf("Didn't expect error: %v", err)
 		}
 		if len(tc.expectedMessages) != len(slackClient.SentMessages) {
 			t.Fatalf("Test: %s The number of messages sent do not tally. Expecting %d messages but received %d messages.",

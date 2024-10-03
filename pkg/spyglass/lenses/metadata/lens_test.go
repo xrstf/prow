@@ -18,6 +18,7 @@ package metadata
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -84,7 +85,7 @@ func TestCheckTimestamps(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		lens, err := lenses.GetLens("metadata")
-		if tc.err != err {
+		if !errors.Is(err, tc.err) {
 			t.Errorf("%s expected error %v but got error %v", tc.name, tc.err, err)
 			continue
 		}

@@ -19,6 +19,7 @@ package gitattributes
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -48,12 +49,11 @@ func NewGroup(gitAttributesContent func() ([]byte, error)) (*Group, error) {
 
 	bs, err := gitAttributesContent()
 	if err != nil {
-		switch err.(type) {
-		case *github.FileNotFound:
+		if notFound := (&github.FileNotFound{}); errors.As(err, &notFound) {
 			return g, nil
-		default:
-			return nil, fmt.Errorf("could not get .gitattributes: %w", err)
 		}
+
+		return nil, fmt.Errorf("could not get .gitattributes: %w", err)
 	}
 
 	if err := g.load(bytes.NewBuffer(bs)); err != nil {

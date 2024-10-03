@@ -133,7 +133,7 @@ func NewGerritController(
 		var err error
 		ircg, err = config.NewInRepoConfigCache(configOptions.InRepoConfigCacheSize, cfgAgent, gc)
 		if err != nil {
-			return nil, fmt.Errorf("failed creating inrepoconfig cache: %v", err)
+			return nil, fmt.Errorf("failed creating inrepoconfig cache: %w", err)
 		}
 	}
 
@@ -219,7 +219,7 @@ func (p *GerritProvider) Query() (map[string]CodeReviewCommon, error) {
 				changes, err := p.gc.QueryChangesForProject(instance, projName, lastUpdate, p.cfg().Gerrit.RateLimit, gerritQueryParam(optInByDefault))
 				if err != nil {
 					p.logger.WithFields(logrus.Fields{"instance": instance, "project": projName}).WithError(err).Warn("Querying gerrit project for changes.")
-					errChan <- fmt.Errorf("failed querying project '%s' from instance '%s': %v", projName, instance, err)
+					errChan <- fmt.Errorf("failed querying project '%s' from instance '%s': %w", projName, instance, err)
 					return
 				}
 				resChan <- changesFromProject{instance: instance, project: projName, changes: changes}
@@ -329,7 +329,7 @@ func (p *GerritProvider) mergePRs(sp subpool, prs []CodeReviewCommon, _ *threadS
 		logger.Info("Submitting change.")
 		_, err := p.gc.SubmitChange(sp.org, pr.Gerrit.ID, true)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("failed submitting change '%s' from org '%s': %v", sp.org, pr.Gerrit.ID, err))
+			errs = append(errs, fmt.Errorf("failed submitting change '%s' from org '%s': %w", sp.org, pr.Gerrit.ID, err))
 		} else {
 			merged = append(merged, pr)
 		}
@@ -408,7 +408,7 @@ func (p *GerritProvider) GetChangedFiles(org, repo string, number int) ([]string
 	// https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes.
 	change, err := p.gc.GetChange(org, strconv.Itoa(number), "CURRENT_FILES", "CURRENT_REVISION")
 	if err != nil {
-		return nil, fmt.Errorf("failed get change: %v", err)
+		return nil, fmt.Errorf("failed get change: %w", err)
 	}
 	return client.ChangedFilesProvider(change)()
 }

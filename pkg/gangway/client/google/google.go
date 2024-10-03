@@ -76,7 +76,7 @@ type Client struct {
 func NewFromFile(addr, keyFile, audience, clientPem, apiKey string) (*Client, error) {
 	keyBytes, err := os.ReadFile(keyFile)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read service account key file %s: %v", keyFile, err)
+		return nil, fmt.Errorf("Unable to read service account key file %s: %w", keyFile, err)
 	}
 
 	return New(addr, keyBytes, audience, clientPem, apiKey)
@@ -88,14 +88,14 @@ func New(addr string, keyBytes []byte, audience, clientPem, apiKey string) (*Cli
 
 	creds, err := credentials.NewClientTLSFromFile(clientPem, "")
 	if err != nil {
-		return nil, fmt.Errorf("could not process clientPem credentials: %v", err)
+		return nil, fmt.Errorf("could not process clientPem credentials: %w", err)
 	}
 
 	c.addr = addr
 
 	conn, err := grpc.NewClient(c.addr, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to %q: %v", c.addr, err)
+		return nil, fmt.Errorf("could not connect to %q: %w", c.addr, err)
 	}
 	c.conn = conn
 	c.GRPC = pb.NewProwClient(c.conn)
@@ -120,7 +120,7 @@ func New(addr string, keyBytes []byte, audience, clientPem, apiKey string) (*Cli
 
 	tokenSource, err := googleOAuth.JWTAccessTokenSourceFromJSON(c.keyBytes, c.audience)
 	if err != nil {
-		return nil, fmt.Errorf("could not create tokenSource: %v", err)
+		return nil, fmt.Errorf("could not create tokenSource: %w", err)
 	}
 
 	c.tokenSource = tokenSource
@@ -134,7 +134,7 @@ func New(addr string, keyBytes []byte, audience, clientPem, apiKey string) (*Cli
 func (c *Client) MkToken() (string, error) {
 	jwt, err := c.tokenSource.Token()
 	if err != nil {
-		return "", fmt.Errorf("could not generate JSON Web Token: %v", err)
+		return "", fmt.Errorf("could not generate JSON Web Token: %w", err)
 	}
 
 	return jwt.AccessToken, nil
@@ -180,7 +180,7 @@ func NewInsecure(addr, projectNumber string) (*ClientInsecure, error) {
 	// Set up a connection to gangway.
 	conn, err := grpc.NewClient(c.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to %q: %v", c.addr, err)
+		return nil, fmt.Errorf("could not connect to %q: %w", c.addr, err)
 	}
 
 	c.conn = conn

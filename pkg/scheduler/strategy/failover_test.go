@@ -58,7 +58,7 @@ func TestFailover(t *testing.T) {
 
 			d, err := failover.Schedule(context.TODO(), tc.pj)
 			if err != nil {
-				t.Fatalf("Unexpected error: %s", err)
+				t.Fatalf("Unexpected error: %v", err)
 			}
 
 			if diff := cmp.Diff(tc.wantDecision, d); diff != "" {

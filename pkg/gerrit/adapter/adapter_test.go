@@ -602,7 +602,7 @@ func createTestRepoCache(t *testing.T, ca *fca) (*config.InRepoConfigCache, erro
 	var lg *localgit.LocalGit
 	lg, cf, err := localgit.NewV2()
 	if err != nil {
-		return nil, fmt.Errorf("error making local git repo: %v", err)
+		return nil, fmt.Errorf("error making local git repo: %w", err)
 	}
 	defer func() {
 		if err := lg.Clean(); err != nil {

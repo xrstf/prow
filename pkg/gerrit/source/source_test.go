@@ -176,14 +176,11 @@ func TestOrgRepoFromCloneURI(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			gotOrg, gotRepo, gotErr := OrgRepoFromCloneURI(tc.cloneURI)
-			if tc.wantErr != nil {
-				if gotErr != tc.wantErr {
-					t.Fatalf("Error mismatch. Want: %v, got: %v", tc.wantErr, gotErr)
-				}
-				return
+			org, repo, err := OrgRepoFromCloneURI(tc.cloneURI)
+			if err != nil {
+				t.Fatalf("Returned unexpected error: %v", err)
 			}
-			if diff := cmp.Diff(tc.want, orgRepo{gotOrg, gotRepo}); diff != "" {
+			if diff := cmp.Diff(tc.want, orgRepo{org, repo}); diff != "" {
 				t.Errorf("CloneURI mismatch. Want(-), got(+):\n%s", diff)
 			}
 		})

@@ -18,10 +18,11 @@ package fakejira
 
 import (
 	"context"
+	"testing"
+
 	"github.com/andygrunwald/go-jira"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"testing"
 )
 
 func TestFakeClient_SearchWithContext(t *testing.T) {
@@ -51,7 +52,7 @@ func TestFakeClient_SearchWithContext(t *testing.T) {
 
 	r, v, err := fakeClient.SearchWithContext(context.Background(), "project=test", searchOptions)
 	if err != nil {
-		t.Fatalf("unexpected error from search: %s", err)
+		t.Fatalf("unexpected error from search: %v", err)
 	}
 	cmpOption := cmpopts.IgnoreUnexported(jira.Date{})
 	if diff := cmp.Diff(r, issueList, cmpOption); diff != "" {

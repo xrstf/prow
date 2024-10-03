@@ -418,7 +418,7 @@ func GetAndCheckRefs(
 	// Parse "baseSHAGetter".
 	baseSHA, err := baseSHAGetter()
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to get baseSHA: %v", err)
+		return "", nil, fmt.Errorf("failed to get baseSHA: %w", err)
 	}
 
 	// Parse "headSHAGetters".
@@ -426,7 +426,7 @@ func GetAndCheckRefs(
 	for _, headSHAGetter := range headSHAGetters {
 		headSHA, err := headSHAGetter()
 		if err != nil {
-			return "", nil, fmt.Errorf("failed to get headRef: %v", err)
+			return "", nil, fmt.Errorf("failed to get headRef: %w", err)
 		}
 		if headSHA != "" {
 			headSHAs = append(headSHAs, headSHA)
@@ -968,7 +968,7 @@ func (g *Gerrit) DefaultAndValidate() error {
 
 	re, err := regexp.Compile(g.AllowedPresubmitTriggerReRawString)
 	if err != nil {
-		return fmt.Errorf("failed to compile regex for allowed presubmit triggers: %s", err.Error())
+		return fmt.Errorf("failed to compile regex for allowed presubmit triggers: %w", err)
 	}
 	g.AllowedPresubmitTriggerRe = &CopyableRegexp{re}
 	return nil
@@ -2163,12 +2163,12 @@ func (c *Config) finalizeJobConfig() error {
 func (c *Config) validateComponentConfig() error {
 	for k, v := range c.Plank.JobURLPrefixConfig {
 		if _, err := url.Parse(v); err != nil {
-			return fmt.Errorf(`invalid value for Planks job_url_prefix_config["%s"]: %v`, k, err)
+			return fmt.Errorf(`invalid value for Planks job_url_prefix_config["%s"]: %w`, k, err)
 		}
 	}
 	if c.Gerrit.DeckURL != "" {
 		if _, err := url.Parse(c.Gerrit.DeckURL); err != nil {
-			return fmt.Errorf("invalid value for gerrit.deck_url: %v", err)
+			return fmt.Errorf("invalid value for gerrit.deck_url: %w", err)
 		}
 	}
 

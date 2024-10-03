@@ -396,7 +396,7 @@ func (gi *GitHubProvider) GetPresubmits(identifier, baseBranch string, baseSHAGe
 func (gi *GitHubProvider) GetChangedFiles(org, repo string, number int) ([]string, error) {
 	changes, err := gi.ghc.GetPullRequestChanges(org, repo, number)
 	if err != nil {
-		return nil, fmt.Errorf("failed get PR changes: %v", err)
+		return nil, fmt.Errorf("failed get PR changes: %w", err)
 	}
 	files := make([]string, 0, len(changes))
 	for _, c := range changes {

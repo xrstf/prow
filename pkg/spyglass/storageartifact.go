@@ -18,6 +18,7 @@ package spyglass
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -166,7 +167,7 @@ func (a *StorageArtifact) ReadAt(p []byte, off int64) (n int, err error) {
 		n, err = reader.Read(p[offset:])
 		offset += n
 		if err != nil {
-			if err == io.EOF && gotEOF {
+			if errors.Is(err, io.EOF) && gotEOF {
 				break
 			}
 			return 0, fmt.Errorf("error reading from artifact: %w", err)
@@ -278,7 +279,7 @@ func (a *StorageArtifact) ReadTail(n int64) ([]byte, error) {
 		offset = size - n
 	}
 	reader, err := a.handle.NewRangeReader(a.ctx, offset, -1)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("error getting artifact reader: %w", err)
 	}
 	defer reader.Close()

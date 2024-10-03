@@ -17,6 +17,7 @@ limitations under the License.
 package lifecycle
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -71,7 +72,7 @@ func handleReopen(gc githubClient, log *logrus.Entry, e *github.GenericCommentEv
 	if e.IsPR {
 		log.Info("/reopen PR")
 		if err := gc.ReopenPullRequest(org, repo, number); err != nil {
-			if scbc, ok := err.(github.StateCannotBeChanged); ok {
+			if scbc := (github.StateCannotBeChanged{}); errors.As(err, &scbc) {
 				resp := fmt.Sprintf("Failed to re-open PR: %v", scbc)
 				return gc.CreateComment(
 					org,
@@ -94,7 +95,7 @@ func handleReopen(gc githubClient, log *logrus.Entry, e *github.GenericCommentEv
 
 	log.Info("/reopen issue")
 	if err := gc.ReopenIssue(org, repo, number); err != nil {
-		if scbc, ok := err.(github.StateCannotBeChanged); ok {
+		if scbc := (github.StateCannotBeChanged{}); errors.As(err, &scbc) {
 			resp := fmt.Sprintf("Failed to re-open Issue: %v", scbc)
 			return gc.CreateComment(
 				org,

@@ -156,7 +156,7 @@ func add(
 		if restConfig, ok := knownClusters[buildClusterName]; ok {
 			authzClient, err := authorizationv1.NewForConfig(&restConfig)
 			if err != nil {
-				return fmt.Errorf("failed to construct authz client: %s", err)
+				return fmt.Errorf("failed to construct authz client: %w", err)
 			}
 			bc.ssar = authzClient.SelfSubjectAccessReviews()
 		}

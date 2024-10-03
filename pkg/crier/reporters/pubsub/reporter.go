@@ -129,7 +129,7 @@ func (c *Client) Report(ctx context.Context, l *logrus.Entry, pj *prowapi.ProwJo
 	_, err = res.Get(ctx)
 	if err != nil {
 		wrappedError := fmt.Errorf(
-			"failed to publish pubsub message with run ID %q to topic: \"%s/%s\". %v",
+			"failed to publish pubsub message with run ID %q to topic: \"%s/%s\". %w",
 			message.RunID, message.Project, message.Topic, err)
 
 		// It would be a user error if the topic doesn't exist, return a user

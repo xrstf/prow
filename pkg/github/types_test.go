@@ -17,6 +17,7 @@ limitations under the License.
 package github
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -97,12 +98,15 @@ func TestUnmarshalClientError(t *testing.T) {
 			  }`,
 		},
 	}
+
+	clientError := ClientError{}
+	altClientError := AlternativeClientError{}
+
 	for _, tc := range testcases {
 		b := []byte(tc.body)
 		err := unmarshalClientError(b)
-		_, isClientError := err.(ClientError)
-		_, isAlternativeClientError := err.(AlternativeClientError)
-		if !(isClientError || isAlternativeClientError) {
+
+		if !errors.As(err, &clientError) && !errors.As(err, &altClientError) {
 			t.Errorf("For case %s, json.Unmarshal error: %v", tc.name, err)
 		}
 	}
