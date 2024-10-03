@@ -146,7 +146,7 @@ func (af *StorageArtifactFetcher) artifacts(ctx context.Context, key string) ([]
 		return artifacts, err
 	}
 
-	wait := []time.Duration{16, 32, 64, 128, 256, 256, 512, 512}
+	delays := []int{16, 32, 64, 128, 256, 256, 512, 512}
 	for i := 0; ; {
 		oAttrs, err := it.Next(ctx)
 		if err == io.EOF {
@@ -157,10 +157,10 @@ func (af *StorageArtifactFetcher) artifacts(ctx context.Context, key string) ([]
 				return nil, err
 			}
 			logrus.WithFields(fieldsForJob(src)).WithError(err).Error("Error accessing GCS artifact.")
-			if i >= len(wait) {
+			if i >= len(delays) {
 				return artifacts, fmt.Errorf("timed out: error accessing GCS artifact: %w", err)
 			}
-			time.Sleep((wait[i] + time.Duration(rand.Intn(10))) * time.Millisecond)
+			time.Sleep(time.Duration(delays[i]+rand.Intn(10)) * time.Millisecond)
 			i++
 			continue
 		}
