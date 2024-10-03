@@ -101,6 +101,7 @@ func TestRoundTrip(t *testing.T) {
 			if err != nil {
 				return
 			}
+			defer response.Body.Close()
 
 			if diff := cmp.Diff(response.StatusCode, tc.expectedResponse.StatusCode); diff != "" {
 				t.Errorf("actual status code differs from expected: %s", diff)

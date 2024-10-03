@@ -105,9 +105,11 @@ func TestHandleLogin(t *testing.T) {
 	handleLoginFn := mockAgent.HandleLogin(mockOAuthClient, false)
 	handleLoginFn.ServeHTTP(mockResponse, mockRequest)
 	result := mockResponse.Result()
+	defer result.Body.Close()
 	if result.StatusCode != http.StatusFound {
 		t.Errorf("Unexpected status code. Got %v, expected %v", result.StatusCode, http.StatusFound)
 	}
+
 	resultCookies := result.Cookies()
 	var oauthCookie *http.Cookie
 	for _, v := range resultCookies {
@@ -167,9 +169,11 @@ func TestHandleLogout(t *testing.T) {
 	handleLoginFn := mockAgent.HandleLogout(mockOAuthClient)
 	handleLoginFn.ServeHTTP(mockResponse, mockRequest)
 	result := mockResponse.Result()
+	defer result.Body.Close()
 	if result.StatusCode != http.StatusFound {
 		t.Errorf("Unexpected status code. Got %v, expected %v", result.StatusCode, http.StatusFound)
 	}
+
 	resultCookies := result.Cookies()
 	var tokenCookie *http.Cookie
 	cookieCounts := 0
@@ -212,9 +216,11 @@ func TestHandleLogoutWithLoginSession(t *testing.T) {
 	handleLoginFn := mockAgent.HandleLogout(mockOAuthClient)
 	handleLoginFn.ServeHTTP(mockResponse, mockRequest)
 	result := mockResponse.Result()
+	defer result.Body.Close()
 	if result.StatusCode != http.StatusFound {
 		t.Errorf("Unexpected status code. Got %v, expected %v", result.StatusCode, http.StatusFound)
 	}
+
 	resultCookies := result.Cookies()
 	var loginCookie *http.Cookie
 	for _, v := range resultCookies {
@@ -284,6 +290,7 @@ func TestHandleRedirectWithInvalidState(t *testing.T) {
 	handleLoginFn := mockAgent.HandleRedirect(mockOAuthClient, &fakeAuthenticatedUserIdentifier{""}, false)
 	handleLoginFn.ServeHTTP(mockResponse, mockRequest)
 	result := mockResponse.Result()
+	defer result.Body.Close()
 
 	if result.StatusCode != http.StatusInternalServerError {
 		t.Errorf("Invalid status code. Got %v, expected %v", result.StatusCode, http.StatusInternalServerError)
@@ -318,6 +325,7 @@ func TestHandleRedirectWithValidState(t *testing.T) {
 	handleLoginFn := mockAgent.HandleRedirect(mockOAuthClient, &fakeAuthenticatedUserIdentifier{mockLogin}, false)
 	handleLoginFn.ServeHTTP(mockResponse, mockRequest)
 	result := mockResponse.Result()
+	defer result.Body.Close()
 	if result.StatusCode != http.StatusFound {
 		t.Errorf("Invalid status code. Got %v, expected %v", result.StatusCode, http.StatusFound)
 	}

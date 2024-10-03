@@ -174,6 +174,7 @@ func (c *Checker) InTestFreeze() (*Result, error) {
 }
 
 func (c *Checker) lastFastForward() (*metav1.Time, error) {
+	//nolint:bodyclose
 	resp, err := c.checker.HttpGet(prowjobsURL)
 	if err != nil {
 		return nil, fmt.Errorf("get prow jobs: %w", err)

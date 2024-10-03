@@ -184,18 +184,22 @@ func mapToStrings(messages []gerrit.ChangeMessageInfo) []string {
 }
 
 func reset() error {
-	_, err := http.Get(fmt.Sprintf("%s/admin/reset", gerritServer))
+	resp, err := http.Get(fmt.Sprintf("%s/admin/reset", gerritServer))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	return nil
 }
 
 func login(id int) error {
-	_, err := http.Get(fmt.Sprintf("%s/admin/login/%d", gerritServer, id))
+	resp, err := http.Get(fmt.Sprintf("%s/admin/login/%d", gerritServer, id))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	return nil
 }
 
@@ -205,10 +209,12 @@ func addChangeToServer(change gerrit.ChangeInfo, project string) error {
 		return err
 	}
 
-	_, err = http.Post(fmt.Sprintf("%s/admin/add/change/%s", gerritServer, project), "application/json", bytes.NewReader(body))
+	resp, err := http.Post(fmt.Sprintf("%s/admin/add/change/%s", gerritServer, project), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	return nil
 }
 
@@ -218,12 +224,13 @@ func addAccountToServer(account gerrit.AccountInfo) error {
 		return err
 	}
 
-	_, err = http.Post(fmt.Sprintf("%s/admin/add/account", gerritServer), "application/json", bytes.NewReader(body))
+	resp, err := http.Post(fmt.Sprintf("%s/admin/add/account", gerritServer), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
-	return nil
+	defer resp.Body.Close()
 
+	return nil
 }
 
 func addBranchToServer(branch gerrit.BranchInfo, project, name string) error {
@@ -232,9 +239,11 @@ func addBranchToServer(branch gerrit.BranchInfo, project, name string) error {
 		return err
 	}
 
-	_, err = http.Post(fmt.Sprintf("%s/admin/add/branch/%s/%s", gerritServer, project, name), "application/json", bytes.NewReader(body))
+	resp, err := http.Post(fmt.Sprintf("%s/admin/add/branch/%s/%s", gerritServer, project, name), "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	return nil
 }

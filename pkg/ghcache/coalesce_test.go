@@ -128,8 +128,8 @@ func TestCacheModeHeader(t *testing.T) {
 		hasher:          ghmetrics.NewCachingHasher(),
 	}
 
-	checkMode := func(resp *http.Response, expected CacheResponseMode) {
-		mode := CacheResponseMode(resp.Header.Get(CacheModeHeader))
+	checkMode := func(header http.Header, expected CacheResponseMode) {
+		mode := CacheResponseMode(header.Get(CacheModeHeader))
 		if mode != expected {
 			t.Errorf("Expected cache mode %s, but got %s.", string(expected), string(mode))
 		}
@@ -139,10 +139,10 @@ func TestCacheModeHeader(t *testing.T) {
 	// This should eventually return ModeMiss.
 	wg.Add(1)
 	go func() {
-		if resp, err := runRequest(coalescer, "/resource1", false); err != nil {
+		if header, err := runRequest(coalescer, "/resource1", false); err != nil {
 			t.Errorf("Failed to run request: %v.", err)
 		} else {
-			checkMode(resp, ModeMiss)
+			checkMode(header, ModeMiss)
 		}
 		wg.Done()
 	}()
@@ -157,10 +157,10 @@ func TestCacheModeHeader(t *testing.T) {
 	// This should coalesce and eventually return ModeCoalesced.
 	wg.Add(1)
 	go func() {
-		if resp, err := runRequest(coalescer, "/resource1", false); err != nil {
+		if header, err := runRequest(coalescer, "/resource1", false); err != nil {
 			t.Errorf("Failed to run request: %v.", err)
 		} else {
-			checkMode(resp, ModeCoalesced)
+			checkMode(header, ModeCoalesced)
 		}
 		wg.Done()
 	}()
@@ -177,10 +177,10 @@ func TestCacheModeHeader(t *testing.T) {
 	header.Set("Status", "304 Not Modified")
 	header.Set(httpcache.XFromCache, "1")
 	fre.responseHeader = header
-	if resp, err := runRequest(coalescer, "/resource1", true); err != nil {
+	if header, err := runRequest(coalescer, "/resource1", true); err != nil {
 		t.Errorf("Failed to run request: %v.", err)
 	} else {
-		checkMode(resp, ModeRevalidated)
+		checkMode(header, ModeRevalidated)
 	}
 
 	// Another request for resource1 after the resource has changed.
@@ -188,19 +188,19 @@ func TestCacheModeHeader(t *testing.T) {
 	header = http.Header{}
 	header.Set("X-Conditional-Request", "I am an E-Tag.")
 	fre.responseHeader = header
-	if resp, err := runRequest(coalescer, "/resource1", true); err != nil {
+	if header, err := runRequest(coalescer, "/resource1", true); err != nil {
 		t.Errorf("Failed to run request: %v.", err)
 	} else {
-		checkMode(resp, ModeChanged)
+		checkMode(header, ModeChanged)
 	}
 
 	// Request for new resource2 with no concurrent requests.
 	// This should return ModeMiss.
 	fre.responseHeader = nil
-	if resp, err := runRequest(coalescer, "/resource2", true); err != nil {
+	if header, err := runRequest(coalescer, "/resource2", true); err != nil {
 		t.Errorf("Failed to run request: %v.", err)
 	} else {
-		checkMode(resp, ModeMiss)
+		checkMode(header, ModeMiss)
 	}
 
 	// Request for uncacheable resource3.
@@ -208,10 +208,10 @@ func TestCacheModeHeader(t *testing.T) {
 	header = http.Header{}
 	header.Set("Cache-Control", "no-store")
 	fre.responseHeader = header
-	if resp, err := runRequest(coalescer, "/resource3", true); err != nil {
+	if header, err := runRequest(coalescer, "/resource3", true); err != nil {
 		t.Errorf("Failed to run request: %v.", err)
 	} else {
-		checkMode(resp, ModeNoStore)
+		checkMode(header, ModeNoStore)
 	}
 
 	// We never send a ModeError mode in a header because we never return a
@@ -224,7 +224,7 @@ func TestCacheModeHeader(t *testing.T) {
 	}
 }
 
-func runRequest(rt http.RoundTripper, uri string, immediate bool) (*http.Response, error) {
+func runRequest(rt http.RoundTripper, uri string, immediate bool) (http.Header, error) {
 	u, err := url.Parse("http://foo.com" + uri)
 	if err != nil {
 		return nil, err
@@ -238,11 +238,17 @@ func runRequest(rt http.RoundTripper, uri string, immediate bool) (*http.Respons
 	}
 
 	waitChan := make(chan struct{})
-	var resp *http.Response
+	var header http.Header
+
 	go func() {
 		defer close(waitChan)
+
+		var resp *http.Response
 		resp, err = rt.RoundTrip(req)
 		if err == nil {
+			defer resp.Body.Close()
+
+			header = resp.Header
 			if b, readErr := io.ReadAll(resp.Body); readErr != nil {
 				err = readErr
 			} else if string(b) != "Response" {
@@ -255,6 +261,6 @@ func runRequest(rt http.RoundTripper, uri string, immediate bool) (*http.Respons
 	case <-time.After(time.Second * 10):
 		return nil, fmt.Errorf("Request for %q timed out.", uri)
 	case <-waitChan:
-		return resp, err
+		return header, err
 	}
 }

@@ -49,7 +49,9 @@ func (frt *fakeRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) 
 	frt.lock.Lock()
 	frt.used = true
 	frt.lock.Unlock()
-	return &http.Response{}, nil
+	return &http.Response{
+		Body: http.NoBody,
+	}, nil
 }
 
 func TestPartitioningRoundTripper(t *testing.T) {
@@ -75,9 +77,11 @@ func TestPartitioningRoundTripper(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_, err := partitioningRoundTripper.RoundTrip(request)
+			resp, err := partitioningRoundTripper.RoundTrip(request)
 			if err != nil {
 				t.Errorf("RoundTrip: %v", err)
+			} else {
+				defer resp.Body.Close()
 			}
 		}()
 	}

@@ -103,8 +103,11 @@ func TestRequestRateLimit(t *testing.T) {
 	c.time = tc
 	resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err != nil {
-		t.Errorf("Error from request: %v", err)
-	} else if resp.StatusCode != 200 {
+		t.Fatalf("Error from request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
 		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
 	} else if tc.slept < time.Second {
 		t.Errorf("Expected to sleep for at least a second, got %v", tc.slept)
@@ -124,8 +127,11 @@ func TestAbuseRateLimit(t *testing.T) {
 	c.time = tc
 	resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err != nil {
-		t.Errorf("Error from request: %v", err)
-	} else if resp.StatusCode != 200 {
+		t.Fatalf("Error from request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
 		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
 	} else if tc.slept < time.Second {
 		t.Errorf("Expected to sleep for at least a second, got %v", tc.slept)
@@ -144,8 +150,11 @@ func TestRetry404(t *testing.T) {
 	c.time = tc
 	resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err != nil {
-		t.Errorf("Error from request: %v", err)
-	} else if resp.StatusCode != 200 {
+		t.Fatalf("Error from request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
 		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
 	}
 }
@@ -177,21 +186,26 @@ func TestIncorrectOAuthScopes(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		tt := &testTime{now: time.Now()}
-		ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("X-Accepted-OAuth-Scopes", tc.acceptedOAuthScopes)
-			w.Header().Set("X-OAuth-Scopes", tc.oauthScopes)
-			http.Error(w, "403 Forbidden", http.StatusForbidden)
-		}))
-		defer ts.Close()
-		c := getClient(ts.URL)
-		c.time = tt
-		_, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
-		if err == nil {
-			t.Error("Expected an error from a request with incorrect OAuth scopes, but succeeded!?")
-		} else if diff := cmp.Diff(err.Error(), tc.expectedErr); diff != "" {
-			t.Errorf("Unexpected error message: %s", diff)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			tt := &testTime{now: time.Now()}
+			ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("X-Accepted-OAuth-Scopes", tc.acceptedOAuthScopes)
+				w.Header().Set("X-OAuth-Scopes", tc.oauthScopes)
+				http.Error(w, "403 Forbidden", http.StatusForbidden)
+			}))
+			defer ts.Close()
+			c := getClient(ts.URL)
+			c.time = tt
+			resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
+			if err == nil {
+				t.Fatalf("Expected an error from a request with incorrect OAuth scopes, but succeeded!?")
+			}
+			defer resp.Body.Close()
+
+			if diff := cmp.Diff(err.Error(), tc.expectedErr); diff != "" {
+				t.Errorf("Unexpected error message: %s", diff)
+			}
+		})
 	}
 }
 
@@ -205,9 +219,10 @@ func TestUnparsable403Error(t *testing.T) {
 	defer ts.Close()
 	c := getClient(ts.URL)
 	c.time = tt
-	_, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
+	resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err == nil {
-		t.Error("Expected an error from a request that can cause a 403 error, but succeeded!?")
+		defer resp.Body.Close()
+		t.Fatal("Expected an error from a request that can cause a 403 error, but succeeded!?")
 	}
 }
 
@@ -221,21 +236,28 @@ func TestRetryBase(t *testing.T) {
 	resp, err := c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err != nil {
 		t.Errorf("Error from request: %v", err)
-	} else if resp.StatusCode != 200 {
-		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+		}
 	}
 	// Bad endpoint followed by good endpoint:
 	c.bases = []string{"not-a-valid-base", c.bases[0]}
 	resp, err = c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err != nil {
 		t.Errorf("Error from request: %v", err)
-	} else if resp.StatusCode != 200 {
-		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+		}
 	}
 	// One bad endpoint:
 	c.bases = []string{"not-a-valid-base"}
-	_, err = c.requestRetry(http.MethodGet, "/", "", "", nil)
+	resp, err = c.requestRetry(http.MethodGet, "/", "", "", nil)
 	if err == nil {
+		defer resp.Body.Close()
 		t.Error("Expected an error from a request to an invalid base, but succeeded!?")
 	}
 }
@@ -2850,7 +2872,9 @@ func (fhc *fakeHttpClient) Do(req *http.Request) (*http.Response, error) {
 		fhc.received = []*http.Request{}
 	}
 	fhc.received = append(fhc.received, req)
-	return &http.Response{}, nil
+	return &http.Response{
+		Body: http.NoBody,
+	}, nil
 }
 
 func TestAuthHeaderGetsSet(t *testing.T) {
@@ -2877,9 +2901,13 @@ func TestAuthHeaderGetsSet(t *testing.T) {
 			fake := &fakeHttpClient{}
 			c := &client{delegate: &delegate{client: fake}, logger: logrus.NewEntry(logrus.New())}
 			tc.mod(c)
-			if _, err := c.doRequest(context.Background(), "POST", "/hello", "", "", nil); err != nil {
+
+			resp, err := c.doRequest(context.Background(), "POST", "/hello", "", "", nil)
+			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+			defer resp.Body.Close()
+
 			if tc.expectedHeader == nil {
 				tc.expectedHeader = http.Header{}
 			}

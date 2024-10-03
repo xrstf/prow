@@ -122,6 +122,8 @@ func (c *Client) Ping() error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode == 200 {
 		return nil
 	}
@@ -146,6 +148,8 @@ func (c *Client) GetProwYAML(refs *prowapi.Refs) (*config.ProwYAML, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("got %v response", resp.StatusCode)
 	}
