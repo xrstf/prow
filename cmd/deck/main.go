@@ -1210,9 +1210,6 @@ func handleArtifactView(o options, sg *spyglass.Spyglass, cfg config.Getter) htt
 		var lens *config.LensFileConfig
 		for _, configLens := range cfg().Deck.Spyglass.Lenses {
 			if configLens.Lens.Name == lensName {
-
-				// Directly followed by break, so this is ok
-				// nolint: exportloopref
 				lens = &configLens
 				break
 			}

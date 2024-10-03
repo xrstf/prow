@@ -99,7 +99,6 @@ func getPreOrPostSpec[p preOrPostsubmit](jobGetter func(string) []p, creator fun
 	orgRepo := setRerunOrgRepo(refs, labels)
 	nameFound := false
 	for _, job := range jobGetter(orgRepo) {
-		job := job
 		if job.GetName() != name {
 			continue
 		}
@@ -135,8 +134,6 @@ func getPeriodicSpec(cfg config.Getter, name string) (*prowapi.ProwJobSpec, map[
 	var periodicJob *config.Periodic
 	for _, job := range cfg().AllPeriodics() {
 		if job.Name == name {
-			// Directly followed by break, so this is ok
-			// nolint: exportloopref
 			periodicJob = &job
 			break
 		}
