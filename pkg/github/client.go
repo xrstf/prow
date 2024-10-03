@@ -824,18 +824,20 @@ func (r requestError) Error() string {
 }
 
 func (r requestError) ErrorMessages() []string {
-	clientErr, isClientError := r.ClientError.(ClientError)
-	if isClientError {
+	clientErr := ClientError{}
+	if errors.As(r.ClientError, &clientErr) {
 		errors := []string{}
 		for _, subErr := range clientErr.Errors {
 			errors = append(errors, subErr.Message)
 		}
 		return errors
 	}
-	alternativeClientErr, isAlternativeClientError := r.ClientError.(AlternativeClientError)
-	if isAlternativeClientError {
-		return alternativeClientErr.Errors
+
+	altClientErr := AlternativeClientError{}
+	if errors.As(r.ClientError, &altClientErr) {
+		return altClientErr.Errors
 	}
+
 	return []string{}
 }
 
@@ -3237,8 +3239,8 @@ var _ error = (*StateCannotBeChanged)(nil)
 
 // convert to a StateCannotBeChanged if appropriate or else return the original error
 func stateCannotBeChangedOrOriginalError(err error) error {
-	requestErr, ok := err.(requestError)
-	if ok {
+	requestErr := requestError{}
+	if errors.As(err, &requestErr) {
 		for _, errorMsg := range requestErr.ErrorMessages() {
 			if strings.Contains(errorMsg, stateCannotBeChangedMessagePrefix) {
 				return StateCannotBeChanged{

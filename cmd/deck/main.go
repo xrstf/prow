@@ -1178,7 +1178,7 @@ lensesLoop:
 func prHistLinkFromTemplate(prHistLinkTemplate, org, repo string, number int) (string, error) {
 	tmp, err := template.New("t").Parse(prHistLinkTemplate)
 	if err != nil {
-		return "", fmt.Errorf("failed compiling template %q: %v", prHistLinkTemplate, err)
+		return "", fmt.Errorf("failed compiling template %q: %w", prHistLinkTemplate, err)
 	}
 	tmpBuff := bytes.Buffer{}
 	if err = tmp.Execute(&tmpBuff, struct {
@@ -1186,7 +1186,7 @@ func prHistLinkFromTemplate(prHistLinkTemplate, org, repo string, number int) (s
 		Repo   string
 		Number int
 	}{org, repo, number}); err != nil {
-		return "", fmt.Errorf("failed executing template %q: %v", prHistLinkTemplate, err)
+		return "", fmt.Errorf("failed executing template %q: %w", prHistLinkTemplate, err)
 	}
 
 	return tmpBuff.String(), nil

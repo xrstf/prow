@@ -21,6 +21,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -206,7 +207,7 @@ func determineContentType(path string) (string, error) {
 	}()
 
 	header := make([]byte, 512)
-	if _, err := file.Read(header); err != nil && err != io.EOF {
+	if _, err := file.Read(header); err != nil && !errors.Is(err, io.EOF) {
 		return "", fmt.Errorf("could not read file to check content type: %w", err)
 	}
 	return http.DetectContentType(header), nil
@@ -271,7 +272,7 @@ func unarchive(archivePath, destPath string) error {
 
 	for {
 		entry, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -470,7 +471,7 @@ func censor(input io.ReadCloser, output io.WriteCloser, censorer secretutil.Cens
 		// shift the buffer over and get ready to repopulate the rest with new data
 		copy(buffer[:numRead], buffer[frameSize:frameSize+numRead])
 		frameSize = numRead
-		if readErr == io.EOF {
+		if errors.Is(readErr, io.EOF) {
 			break
 		}
 	}

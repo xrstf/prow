@@ -354,7 +354,7 @@ func TestLoadDockerCredentials(t *testing.T) {
 	}
 	sort.Strings(actual)
 	if diff := cmp.Diff(actual, expected); diff != "" {
-		t.Errorf("dockercfg: got incorrect values: %s", err)
+		t.Errorf("dockercfg: got incorrect values: %v", err)
 	}
 
 	actual, err = loadDockerconfigJsonAuths(dockerconfigjsonraw)
@@ -363,7 +363,7 @@ func TestLoadDockerCredentials(t *testing.T) {
 	}
 	sort.Strings(actual)
 	if diff := cmp.Diff(actual, expected); diff != "" {
-		t.Errorf("dockerconfigjson: got incorrect values: %s", err)
+		t.Errorf("dockerconfigjson: got incorrect values: %v", err)
 	}
 }
 

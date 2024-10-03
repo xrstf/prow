@@ -104,7 +104,7 @@ func (a *PodLogArtifact) ReadAt(p []byte, off int64) (n int, err error) {
 	}
 	r := bytes.NewReader(logs)
 	readBytes, err := r.ReadAt(p, off)
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		return readBytes, io.EOF
 	}
 	if err != nil {
@@ -143,7 +143,7 @@ func (a *PodLogArtifact) ReadAtMost(n int64) ([]byte, error) {
 	var p []byte
 	for byteCount < n {
 		b, err := reader.ReadByte()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return p, io.EOF
 		}
 		if err != nil {
@@ -173,7 +173,7 @@ func (a *PodLogArtifact) ReadTail(n int64) ([]byte, error) {
 	}
 	p := make([]byte, n)
 	readBytes, err := bytes.NewReader(logs).ReadAt(p, off)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("error reading pod log tail: %w", err)
 	}
 	return p[:readBytes], nil

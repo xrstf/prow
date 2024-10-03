@@ -105,7 +105,7 @@ func TestTrusted(t *testing.T) {
 			}
 			_, actual, err := TrustedPullRequest(g, trigger, tc.author, "kubernetes-sigs", "random-repo", 1, labels)
 			if err != nil {
-				t.Fatalf("Didn't expect error: %s", err)
+				t.Fatalf("Didn't expect error: %v", err)
 			}
 			if actual != tc.expected {
 				t.Errorf("actual result %t != expected %t", actual, tc.expected)
@@ -497,7 +497,7 @@ func TestHandlePullRequest(t *testing.T) {
 			}
 			trigger.SetDefaults()
 			if err := handlePR(c, trigger, pr); err != nil {
-				t.Fatalf("Didn't expect error: %s", err)
+				t.Fatalf("Didn't expect error: %v", err)
 			}
 			var numStarted int
 			for _, action := range fakeProwJobClient.Actions() {

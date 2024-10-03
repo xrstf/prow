@@ -18,6 +18,7 @@ package throttle
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -164,7 +165,7 @@ func TestThrottle(t *testing.T) {
 			if slowed != tc.expectThrottling {
 				t.Errorf("expected throttling: %t, got throttled: %t", tc.expectThrottling, slowed)
 			}
-			if err := ctx.Err(); err != context.Canceled {
+			if err := ctx.Err(); !errors.Is(err, context.Canceled) {
 				t.Errorf("Expected context cancellation did not happen: %v", err)
 			}
 		})

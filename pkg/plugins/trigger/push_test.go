@@ -269,7 +269,7 @@ func TestHandlePEScheduling(t *testing.T) {
 
 			pjs, err := c.ProwJobClient.List(context.TODO(), v1.ListOptions{})
 			if err != nil {
-				t.Fatalf("Couldn't get PJs from the fake client: %s", err)
+				t.Fatalf("Couldn't get PJs from the fake client: %v", err)
 			}
 
 			if len(pjs.Items) != 1 {

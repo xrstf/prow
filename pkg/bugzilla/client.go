@@ -19,6 +19,7 @@ package bugzilla
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -779,29 +780,29 @@ func (e requestError) Error() string {
 }
 
 func IsNotFound(err error) bool {
-	reqError, ok := err.(*requestError)
-	if !ok {
-		return false
+	requestErr := &requestError{}
+	if errors.As(err, &requestErr) {
+		return requestErr.statusCode == http.StatusNotFound
 	}
-	return reqError.statusCode == http.StatusNotFound
+
+	return false
 }
 
 func IsInvalidBugID(err error) bool {
-	reqError, ok := err.(*requestError)
-	if !ok {
-		return false
+	requestErr := &requestError{}
+	if errors.As(err, &requestErr) {
+		return requestErr.bugzillaCode == 101
 	}
-	return reqError.bugzillaCode == 101
+
+	return false
 }
 
 func IsAccessDenied(err error) bool {
-	reqError, ok := err.(*requestError)
-	if !ok {
-		return false
+	requestErr := &requestError{}
+	if errors.As(err, &requestErr) {
+		return requestErr.bugzillaCode == 102 || requestErr.statusCode == 401
 	}
-	if reqError.bugzillaCode == 102 || reqError.statusCode == 401 {
-		return true
-	}
+
 	return false
 }
 
@@ -1004,8 +1005,8 @@ func (i identifierNotForPull) Error() string {
 }
 
 func IsIdentifierNotForPullErr(err error) bool {
-	_, ok := err.(*identifierNotForPull)
-	return ok
+	var notFound *identifierNotForPull
+	return errors.As(err, &notFound)
 }
 
 func (c *client) SearchBugs(filters map[string]string) ([]*Bug, error) {
@@ -1028,7 +1029,7 @@ func (c *client) SearchBugs(filters map[string]string) ([]*Bug, error) {
 		Bugs []*Bug `json:"bugs,omitempty"`
 	}
 	if err := json.Unmarshal(raw, &parsedResponse); err != nil {
-		return nil, fmt.Errorf("could not unmarshal response body: %v", err)
+		return nil, fmt.Errorf("could not unmarshal response body: %w", err)
 	}
 	return parsedResponse.Bugs, nil
 }

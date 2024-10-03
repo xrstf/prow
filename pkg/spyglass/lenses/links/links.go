@@ -19,6 +19,7 @@ package links
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -161,7 +162,7 @@ func (lens Lens) Body(artifacts []api.Artifact, resourceDir string, data string,
 	for _, artifact := range artifacts {
 		jobPath := artifact.JobPath()
 		content, err := artifact.ReadAtMost(bytesLimit)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			logrus.WithError(err).Warnf("Failed to read artifact file: %q", jobPath)
 			continue
 		}

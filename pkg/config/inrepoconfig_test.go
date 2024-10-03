@@ -311,7 +311,7 @@ func testDefaultProwYAMLGetter(clients localgit.Clients, t *testing.T) {
 			dontPassGitClient: true,
 			validate: func(_ *ProwYAML, err error) error {
 				if err == nil || err.Error() != "gitClient is nil" {
-					return fmt.Errorf(`expected error to be "gitClient is nil", was %v`, err)
+					return fmt.Errorf(`expected error to be "gitClient is nil", was %w`, err)
 				}
 				return nil
 			},

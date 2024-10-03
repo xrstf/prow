@@ -149,11 +149,11 @@ func (af *StorageArtifactFetcher) artifacts(ctx context.Context, key string) ([]
 	delays := []int{16, 32, 64, 128, 256, 256, 512, 512}
 	for i := 0; ; {
 		oAttrs, err := it.Next(ctx)
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
-			if err == context.Canceled {
+			if errors.Is(err, context.Canceled) {
 				return nil, err
 			}
 			logrus.WithFields(fieldsForJob(src)).WithError(err).Error("Error accessing GCS artifact.")

@@ -184,23 +184,20 @@ func TestReconcile(t *testing.T) {
 				}
 				return
 			} else if tc.wantError != nil && err == nil {
-				t.Errorf("Expected error %s but got nil", tc.wantError)
-				return
+				t.Fatalf("Expected error %s but got nil", tc.wantError)
 			} else if tc.wantError == nil && err != nil {
-				t.Errorf("Expected error nil but got %s", err)
-				return
+				t.Fatalf("Expected error nil but got %v", err)
 			}
 
 			pjs := prowv1.ProwJobList{}
 			if err := pjClient.List(context.TODO(), &pjs); err != nil {
 				// It's just not supposed to happen
-				t.Fatalf("Couldn't get PJs from the fake client: %s", err)
+				t.Fatalf("Couldn't get PJs from the fake client: %v", err)
 			}
 
 			if tc.wantPJ != nil {
 				if len(pjs.Items) != 1 {
-					t.Errorf("Expected 1 ProwJob but got %d", len(pjs.Items))
-					return
+					t.Fatalf("Expected 1 ProwJob but got %d", len(pjs.Items))
 				}
 				if diff := cmp.Diff(tc.wantPJ, &pjs.Items[0]); diff != "" {
 					t.Errorf("Unexpected ProwJob: %s", diff)
@@ -309,7 +306,7 @@ func TestConfigHotReload(t *testing.T) {
 			pjs := prowv1.ProwJobList{}
 			if err := pjClient.List(context.TODO(), &pjs); err != nil {
 				// It's just not supposed to happen
-				t.Fatalf("Couldn't get PJs from the fake client: %s", err)
+				t.Fatalf("Couldn't get PJs from the fake client: %v", err)
 			}
 
 			if diff := cmp.Diff(tc.wantPJs, pjs.Items); diff != "" {

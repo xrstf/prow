@@ -19,6 +19,7 @@ package spyglass
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -166,7 +167,7 @@ func TestNewGCSJobSource(t *testing.T) {
 			cfg().Deck.Spyglass.BucketAliases = map[string]string{"alias": "test-bucket"}
 			af := NewStorageArtifactFetcher(nil, cfg, false)
 			jobSource, err := af.newStorageJobSource(tc.src)
-			if err != tc.expectedErr {
+			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("Expected err: %v, got err: %v", tc.expectedErr, err)
 			}
 			if tc.exBucket != jobSource.bucket {

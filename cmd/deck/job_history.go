@@ -203,7 +203,7 @@ func (bucket blobStorageBucket) listSubDirs(ctx context.Context, prefix string) 
 	for {
 		attrs, err := it.Next(ctx)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			return dirs, err
@@ -229,7 +229,7 @@ func (bucket blobStorageBucket) listAll(ctx context.Context, prefix string) ([]s
 	for {
 		attrs, err := it.Next(ctx)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			return keys, err

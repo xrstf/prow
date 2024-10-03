@@ -74,13 +74,13 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 	// CA private key
 	caPrivKey, err := rsa.GenerateKey(cryptorand.Reader, 4096)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error generating ca private key: %v", err)
+		return "", "", "", fmt.Errorf("error generating ca private key: %w", err)
 	}
 
 	// Self signed CA certificate
 	caBytes, err := x509.CreateCertificate(cryptorand.Reader, ca, ca, &caPrivKey.PublicKey, caPrivKey)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error generating signed ca certificate: %v", err)
+		return "", "", "", fmt.Errorf("error generating signed ca certificate: %w", err)
 	}
 
 	// PEM encode CA cert
@@ -90,7 +90,7 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 		Bytes: caBytes,
 	})
 	if err != nil {
-		return "", "", "", fmt.Errorf("error encoding ca certificate: %v", err)
+		return "", "", "", fmt.Errorf("error encoding ca certificate: %w", err)
 	}
 
 	// server cert config
@@ -111,13 +111,13 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 	// server private key
 	serverPrivKey, err := rsa.GenerateKey(cryptorand.Reader, 4096)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error generating server private key: %v", err)
+		return "", "", "", fmt.Errorf("error generating server private key: %w", err)
 	}
 
 	// sign the server cert
 	serverCertBytes, err := x509.CreateCertificate(cryptorand.Reader, cert, ca, &serverPrivKey.PublicKey, caPrivKey)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error generating signed server certificate: %v", err)
+		return "", "", "", fmt.Errorf("error generating signed server certificate: %w", err)
 	}
 
 	// PEM encode the  server cert and key
@@ -127,7 +127,7 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 		Bytes: serverCertBytes,
 	})
 	if err != nil {
-		return "", "", "", fmt.Errorf("error encoding server certificate: %v", err)
+		return "", "", "", fmt.Errorf("error encoding server certificate: %w", err)
 	}
 
 	serverPrivKeyPEM = new(bytes.Buffer)
@@ -136,7 +136,7 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 		Bytes: x509.MarshalPKCS1PrivateKey(serverPrivKey),
 	})
 	if err != nil {
-		return "", "", "", fmt.Errorf("error encoding server private key: %v", err)
+		return "", "", "", fmt.Errorf("error encoding server private key: %w", err)
 	}
 
 	return serverCertPEM.String(), serverPrivKeyPEM.String(), caPEM.String(), nil
@@ -157,12 +157,12 @@ func isCertValid(cert string) error {
 
 func createSecret(client ClientInterface, ctx context.Context, clientoptions clientOptions) (string, string, string, error) {
 	if err := client.CreateSecret(ctx, clientoptions.secretID); err != nil {
-		return "", "", "", fmt.Errorf("unable to create secret %v", err)
+		return "", "", "", fmt.Errorf("unable to create secret: %w", err)
 	}
 
 	serverCertPerm, serverPrivKey, caPem, err := updateSecret(client, ctx, clientoptions)
 	if err != nil {
-		return "", "", "", fmt.Errorf("unable to write secret value %v", err)
+		return "", "", "", fmt.Errorf("unable to write secret value: %w", err)
 	}
 	return serverCertPerm, serverPrivKey, caPem, nil
 }
@@ -174,7 +174,7 @@ func updateSecret(client ClientInterface, ctx context.Context, clientoptions cli
 	}
 
 	if err := client.AddSecretVersion(ctx, clientoptions.secretID, secretData); err != nil {
-		return "", "", "", fmt.Errorf("unable to add secret version %v", err)
+		return "", "", "", fmt.Errorf("unable to add secret version: %w", err)
 	}
 
 	return serverCertPerm, serverPrivKey, caPem, nil
@@ -193,7 +193,7 @@ func genSecretData(expiry int, dns []string) (string, string, string, []byte, er
 	secretData, err := json.Marshal(caSecrets)
 
 	if err != nil {
-		return "", "", "", nil, fmt.Errorf("error unmarshalling CA cert secret data: %v", err)
+		return "", "", "", nil, fmt.Errorf("error unmarshalling CA cert secret data: %w", err)
 	}
 
 	return serverCertPerm, serverPrivKey, caPem, secretData, nil
@@ -390,7 +390,7 @@ func checkWebhooksExist(ctx context.Context, client ctrlruntimeclient.Client) (s
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return "", "", false, nil
 	} else if err != nil {
-		return "", "", false, fmt.Errorf("error getting mutating webhook config %v", err)
+		return "", "", false, fmt.Errorf("error getting mutating webhook config: %w", err)
 	}
 	mutatingExists = true
 
@@ -398,7 +398,7 @@ func checkWebhooksExist(ctx context.Context, client ctrlruntimeclient.Client) (s
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return "", "", false, nil
 	} else if err != nil {
-		return "", "", false, fmt.Errorf("error getting validating webhook config %v", err)
+		return "", "", false, fmt.Errorf("error getting validating webhook config: %w", err)
 	}
 	validatingExists = true
 
@@ -416,17 +416,17 @@ func reconcileWebhooks(ctx context.Context, caPem string, cl ctrlruntimeclient.C
 	}
 	if exist && (validatingCAPem != caPem || mutatingCAPem != caPem) {
 		if err := patchValidatingWebhookConfig(ctx, caPem, cl); err != nil {
-			return fmt.Errorf("unable to patch ValidatingWebhookConfig %v", err)
+			return fmt.Errorf("unable to patch ValidatingWebhookConfig: %w", err)
 		}
 		if err := patchMutatingWebhookConfig(ctx, caPem, cl); err != nil {
-			return fmt.Errorf("unable to patch MutatingWebhookConfig %v", err)
+			return fmt.Errorf("unable to patch MutatingWebhookConfig: %w", err)
 		}
 	} else if !exist {
 		if err = ensureValidatingWebhookConfig(ctx, caPem, cl); err != nil {
-			return fmt.Errorf("unable to generate ValidatingWebhookConfig %v", err)
+			return fmt.Errorf("unable to generate ValidatingWebhookConfig: %w", err)
 		}
 		if err = ensureMutatingWebhookConfig(ctx, caPem, cl); err != nil {
-			return fmt.Errorf("unable to generate MutatingWebhookConfig %v", err)
+			return fmt.Errorf("unable to generate MutatingWebhookConfig: %w", err)
 		}
 	}
 	return nil

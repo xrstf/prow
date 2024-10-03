@@ -47,9 +47,8 @@ func TestPassthrough(t *testing.T) {
 
 			passthrough := strategy.Passthrough{}
 			result, err := passthrough.Schedule(context.TODO(), tc.pj)
-
 			if err != nil {
-				t.Errorf("Unexpected error: %s", err)
+				t.Fatalf("Unexpected error: %v", err)
 			}
 
 			if diff := cmp.Diff(tc.wantResult, result); diff != "" {

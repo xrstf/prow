@@ -521,8 +521,8 @@ func (c *Controller) handleInRepoConfigError(err error, instance string, change 
 		skipIrrelevantComments := c.config().Gerrit.AllowedPresubmitTriggerReRawString != ""
 		if _, alreadyReported := c.inRepoConfigFailuresTracker[key]; !alreadyReported || skipIrrelevantComments {
 			msg := fmt.Sprintf("%s: %v", inRepoConfigFailed, err)
-			if setReviewWerr := c.gc.SetReview(instance, change.ID, change.CurrentRevision, msg, nil); setReviewWerr != nil {
-				return fmt.Errorf("failed to get inRepoConfig and failed to set Review to notify user: %v and %v", err, setReviewWerr)
+			if setReviewErr := c.gc.SetReview(instance, change.ID, change.CurrentRevision, msg, nil); setReviewErr != nil {
+				return fmt.Errorf("failed to get inRepoConfig and failed to set Review to notify user: %w and %s", err, setReviewErr.Error())
 			}
 			// The boolean value here is meaningless as we use the tracker as a
 			// set data structure, not as a hashmap where values actually

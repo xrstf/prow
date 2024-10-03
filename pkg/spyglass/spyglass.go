@@ -20,6 +20,7 @@ package spyglass
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -151,7 +152,7 @@ func (l lensConfigWrapper) Config() lenses.LensConfig {
 
 func getLensConfig(lensFileConfig config.LensFileConfig) (LensConfig, error) {
 	lens, err := lenses.GetLens(lensFileConfig.Lens.Name)
-	if err != nil && err != lenses.ErrInvalidLensName {
+	if err != nil && !errors.Is(err, lenses.ErrInvalidLensName) {
 		return nil, err
 	}
 	if err == nil {
@@ -201,7 +202,7 @@ func (sg *Spyglass) ResolveSymlink(src string) (string, error) {
 		// Avoid using ReadAll here to prevent an attacker forcing us to read a giant file into memory.
 		bytes := make([]byte, 4096) // assume we won't get more than 4 kB of symlink to read
 		n, err := reader.Read(bytes)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return "", fmt.Errorf("failed to read symlink file (which does seem to exist): %w", err)
 		}
 		if n == len(bytes) {

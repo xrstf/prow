@@ -241,7 +241,7 @@ func generateCerts(url string) (string, string, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to generate serial number: %s", err)
+		return "", "", fmt.Errorf("failed to generate serial number: %w", err)
 	}
 
 	template := x509.Certificate{
@@ -261,18 +261,18 @@ func generateCerts(url string) (string, string, error) {
 
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create certificate: %s", err)
+		return "", "", fmt.Errorf("failed to create certificate: %w", err)
 	}
 
 	certOut, err := os.CreateTemp("", "cert.pem")
 	if err != nil {
-		return "", "", fmt.Errorf("failed to open cert.pem for writing: %s", err)
+		return "", "", fmt.Errorf("failed to open cert.pem for writing: %w", err)
 	}
 	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
-		return "", "", fmt.Errorf("failed to write data to cert.pem: %s", err)
+		return "", "", fmt.Errorf("failed to write data to cert.pem: %w", err)
 	}
 	if err := certOut.Close(); err != nil {
-		return "", "", fmt.Errorf("error closing cert.pem: %s", err)
+		return "", "", fmt.Errorf("error closing cert.pem: %w", err)
 	}
 
 	keyOut, err := os.CreateTemp("", "key.pem")
@@ -284,10 +284,10 @@ func generateCerts(url string) (string, string, error) {
 		return "", "", fmt.Errorf("unable to marshal private key: %w", err)
 	}
 	if err := pem.Encode(keyOut, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes}); err != nil {
-		return "", "", fmt.Errorf("failed to write data to key.pem: %s", err)
+		return "", "", fmt.Errorf("failed to write data to key.pem: %w", err)
 	}
 	if err := keyOut.Close(); err != nil {
-		return "", "", fmt.Errorf("error closing key.pem: %s", err)
+		return "", "", fmt.Errorf("error closing key.pem: %w", err)
 	}
 	if err := os.Chmod(keyOut.Name(), 0600); err != nil {
 		return "", "", fmt.Errorf("could not change permissions on key.pem: %w", err)

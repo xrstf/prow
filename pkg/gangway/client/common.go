@@ -49,7 +49,7 @@ func (c *Common) WaitForJobExecutionStatus(ctx context.Context, jobExecutionId s
 	}
 
 	if waitErr := wait.PollUntilContextTimeout(ctx, pollInterval, timeout, true, expectJobStatus); waitErr != nil {
-		return fmt.Errorf("timed out waiting for the condition: %v", waitErr)
+		return fmt.Errorf("timed out waiting for the condition: %w", waitErr)
 	}
 
 	return nil

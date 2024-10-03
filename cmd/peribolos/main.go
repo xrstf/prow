@@ -402,7 +402,7 @@ func configureOrgMembers(opt options, client orgClient, orgName string, orgConfi
 	}
 	if opt.requireSelf {
 		if me, err := client.BotUser(); err != nil {
-			return fmt.Errorf("cannot determine user making requests for %s: %v", opt.github.TokenPath, err)
+			return fmt.Errorf("cannot determine user making requests for %s: %w", opt.github.TokenPath, err)
 		} else if !wantAdmins.Has(me.Login) {
 			return fmt.Errorf("authenticated user %s is not an admin of %s", me.Login, orgName)
 		}

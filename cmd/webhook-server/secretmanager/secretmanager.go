@@ -18,6 +18,7 @@ package secretmanager
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -137,7 +138,7 @@ func (c *Client) ListSecrets(ctx context.Context) ([]*secretmanagerpb.Secret, er
 	for {
 		s, err := it.Next()
 		if err != nil {
-			if err == iterator.Done {
+			if errors.Is(err, iterator.Done) {
 				break
 			}
 			return nil, err

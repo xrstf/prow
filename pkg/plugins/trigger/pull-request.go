@@ -79,7 +79,7 @@ func handlePR(c Client, trigger plugins.Trigger, pr github.PullRequestEvent) err
 		trustedResponse, err := TrustedUser(c.GitHubClient, trigger.OnlyOrgMembers, trigger.TrustedApps, trigger.TrustedOrg, author, org, repo)
 		member := trustedResponse.IsTrusted
 		if err != nil {
-			return fmt.Errorf("could not check membership: %s", err)
+			return fmt.Errorf("could not check membership: %w", err)
 		}
 		if member {
 			// dedicated draft check for create to comment on the PR
@@ -129,7 +129,7 @@ func handlePR(c Client, trigger plugins.Trigger, pr github.PullRequestEvent) err
 		if pr.Label.Name == labels.LGTM {
 			_, trusted, err := TrustedPullRequest(c.GitHubClient, trigger, author, org, repo, num, nil)
 			if err != nil {
-				return fmt.Errorf("could not validate PR: %s", err)
+				return fmt.Errorf("could not validate PR: %w", err)
 			} else if !trusted {
 				c.Logger.Info("Starting all jobs for untrusted PR with LGTM.")
 				return buildAllButDrafts(c, &pr.PullRequest, pr.GUID, baseSHA, presubmits)
@@ -232,8 +232,9 @@ func buildAllIfTrusted(c Client, trigger plugins.Trigger, pr github.PullRequestE
 	num := pr.PullRequest.Number
 	l, trusted, err := TrustedPullRequest(c.GitHubClient, trigger, author, org, repo, num, nil)
 	if err != nil {
-		return fmt.Errorf("could not validate PR: %s", err)
-	} else if trusted {
+		return fmt.Errorf("could not validate PR: %w", err)
+	}
+	if trusted {
 		// Eventually remove needs-ok-to-test
 		// Will not work for org members since labels are not fetched in this case
 		if github.HasLabel(labels.NeedsOkToTest, l) {

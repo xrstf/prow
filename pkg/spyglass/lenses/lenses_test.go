@@ -18,6 +18,7 @@ package lenses
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -104,7 +105,7 @@ crazy`,
 	}
 	for _, tc := range testCases {
 		lens, err := GetLens(tc.lensName)
-		if tc.err != err {
+		if !errors.Is(err, tc.err) {
 			t.Errorf("%s expected error %v but got error %v", tc.name, tc.err, err)
 			continue
 		}

@@ -17,6 +17,7 @@ limitations under the License.
 package repoowners
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -555,12 +556,12 @@ func (o *RepoOwners) walkFunc(path string, info os.FileInfo, err error) error {
 	}
 
 	simple, err := o.ParseSimpleConfig(path)
-	if err == filepath.SkipDir {
+	if errors.Is(err, filepath.SkipDir) {
 		return err
 	}
 	if err != nil || simple.Empty() {
 		c, err := o.ParseFullConfig(path)
-		if err == filepath.SkipDir {
+		if errors.Is(err, filepath.SkipDir) {
 			return err
 		}
 		if err != nil {

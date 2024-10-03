@@ -412,7 +412,7 @@ func (c *Client) QueryChangesForProject(instance, project string, lastUpdate tim
 
 	changes, err := h.QueryChangesForProject(log, project, lastUpdate, rateLimit, append(queryStringsFromQueryFilter(queryFilters), additionalFilters...)...)
 	if err != nil {
-		return []ChangeInfo{}, fmt.Errorf("failed to query changes for project %q of %q instance: %v", project, instance, err)
+		return []ChangeInfo{}, fmt.Errorf("failed to query changes for project %q of %q instance: %w", project, instance, err)
 	}
 	return changes, nil
 }

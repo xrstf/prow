@@ -92,7 +92,7 @@ func (gr *gcsReporter) reportStartedJob(ctx context.Context, log *logrus.Entry, 
 	if err != nil {
 		// Started.json storage path is invalid, so this function will
 		// eventually fail.
-		return fmt.Errorf("failed to resolve started.json path: %v", err)
+		return fmt.Errorf("failed to resolve started.json path: %w", err)
 	}
 
 	content, err := io.ReadContent(ctx, log, gr.opener, startedFilePath)
@@ -178,7 +178,7 @@ func (gr *gcsReporter) reportFinishedJob(ctx context.Context, log *logrus.Entry,
 	overwriteOpt := io.WriterOptions{PreconditionDoesNotExist: ptr.To(true)}
 	finishedFilePath, err := providers.StoragePath(bucketName, path.Join(dir, prowv1.FinishedStatusFile))
 	if err != nil {
-		return fmt.Errorf("failed to resolve finished.json path: %v", err)
+		return fmt.Errorf("failed to resolve finished.json path: %w", err)
 	}
 	return io.WriteContent(ctx, log, gr.opener, finishedFilePath, output, overwriteOpt)
 }
@@ -202,7 +202,7 @@ func (gr *gcsReporter) reportProwjob(ctx context.Context, log *logrus.Entry, pj 
 	overWriteOpts := io.WriterOptions{PreconditionDoesNotExist: ptr.To(false)}
 	prowJobFilePath, err := providers.StoragePath(bucketName, path.Join(dir, prowv1.ProwJobFile))
 	if err != nil {
-		return fmt.Errorf("failed to resolve prowjob.json path: %v", err)
+		return fmt.Errorf("failed to resolve prowjob.json path: %w", err)
 	}
 	return io.WriteContent(ctx, log, gr.opener, prowJobFilePath, output, overWriteOpts)
 }

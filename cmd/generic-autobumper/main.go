@@ -327,7 +327,7 @@ func updateReferencesWrapper(ctx context.Context, o *options) (map[string]string
 		var err error
 		client, err = google.DefaultClient(ctx, cloudPlatformScope)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create authed client: %v", err)
+			return nil, fmt.Errorf("failed to create authed client: %w", err)
 		}
 	}
 	imageBumperCli := imagebumper.NewClient(client)

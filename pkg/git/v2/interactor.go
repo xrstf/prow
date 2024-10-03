@@ -125,11 +125,11 @@ func (i *interactor) ResetHard(commitlike string) error {
 	// `git reset --hard` doesn't cleanup untracked file
 	i.logger.Info("Clean untracked files and dirs.")
 	if out, err := i.executor.Run("clean", "-df"); err != nil {
-		return fmt.Errorf("error clean -df: %v. output: %s", err, string(out))
+		return fmt.Errorf("error clean -df: %w. output: %s", err, string(out))
 	}
 	i.logger.WithField("commitlike", commitlike).Info("Reset hard.")
 	if out, err := i.executor.Run("reset", "--hard", commitlike); err != nil {
-		return fmt.Errorf("error reset hard %s: %v. output: %s", commitlike, err, string(out))
+		return fmt.Errorf("error reset hard %s: %w. output: %s", commitlike, err, string(out))
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func (i *interactor) IsDirty() (bool, error) {
 	i.logger.Info("Checking is dirty.")
 	b, err := i.executor.Run("status", "--porcelain")
 	if err != nil {
-		return false, fmt.Errorf("error add -A: %v. output: %s", err, string(b))
+		return false, fmt.Errorf("error add -A: %w. output: %s", err, string(b))
 	}
 	return len(b) > 0, nil
 }
@@ -167,7 +167,7 @@ func (i *interactor) CloneWithRepoOpts(from string, repoOpts RepoOpts) error {
 	cloneArgs = append(cloneArgs, from, i.dir)
 
 	if out, err := i.executor.Run(cloneArgs...); err != nil {
-		return fmt.Errorf("error creating a clone: %w %v", err, string(out))
+		return fmt.Errorf("error creating a clone: %w (%v)", err, string(out))
 	}
 
 	// For sparse checkouts, we have to do some additional housekeeping after
@@ -185,7 +185,7 @@ func (i *interactor) CloneWithRepoOpts(from string, repoOpts RepoOpts) error {
 
 		timeBeforeSparseCheckout := time.Now()
 		if out, err := i.executor.Run(sparseCheckoutArgs...); err != nil {
-			return fmt.Errorf("error setting it to a sparse checkout: %w %v", err, string(out))
+			return fmt.Errorf("error setting it to a sparse checkout: %w (%v)", err, string(out))
 		}
 		gitMetrics.sparseCheckoutDuration.Observe(time.Since(timeBeforeSparseCheckout).Seconds())
 	}
@@ -200,7 +200,7 @@ func (i *interactor) MirrorClone() error {
 		return fmt.Errorf("could not resolve remote for cloning: %w", err)
 	}
 	if out, err := i.executor.Run("clone", "--mirror", remote, i.dir); err != nil {
-		return fmt.Errorf("error creating a mirror clone: %w %v", err, string(out))
+		return fmt.Errorf("error creating a mirror clone: %w (%v)", err, string(out))
 	}
 	return nil
 }
@@ -381,7 +381,7 @@ func (i *interactor) mergeRebase(commitlike string) (bool, error) {
 	if err != nil {
 		i.logger.WithField("out", string(b)).WithError(err).Infof("Rebase failed.")
 		if b, err := i.executor.Run("rebase", "--abort"); err != nil {
-			return false, fmt.Errorf("error aborting after failed rebase for commitlike %s: %v. output: %s", commitlike, err, string(b))
+			return false, fmt.Errorf("error aborting after failed rebase for commitlike %s: %w. output: %s", commitlike, err, string(b))
 		}
 		return false, nil
 	}
@@ -456,7 +456,7 @@ func (i *interactor) FetchCommits(commitSHAs []string) error {
 	}
 
 	if err := i.Fetch(fetchArgs...); err != nil {
-		return fmt.Errorf("failed to fetch %s: %v", fetchArgs, err)
+		return fmt.Errorf("failed to fetch %s: %w", fetchArgs, err)
 	}
 
 	return nil
@@ -466,7 +466,7 @@ func (i *interactor) FetchCommits(commitSHAs []string) error {
 func (i *interactor) RetargetBranch(branch, sha string) error {
 	args := []string{"branch", "-f", branch, sha}
 	if out, err := i.executor.Run(args...); err != nil {
-		return fmt.Errorf("error retargeting branch: %w %v", err, string(out))
+		return fmt.Errorf("error retargeting branch: %w (%v)", err, string(out))
 	}
 
 	return nil
@@ -484,12 +484,12 @@ func (i *interactor) RemoteUpdate() error {
 
 	i.logger.Info("Setting remote URL")
 	if out, err := i.executor.Run("remote", "set-url", "origin", remote); err != nil {
-		return fmt.Errorf("error setting remote URL: %w %v", err, string(out))
+		return fmt.Errorf("error setting remote URL: %w (%v)", err, string(out))
 	}
 
 	i.logger.Info("Updating from remote")
 	if out, err := i.executor.Run("remote", "update", "--prune"); err != nil {
-		return fmt.Errorf("error updating: %w %v", err, string(out))
+		return fmt.Errorf("error updating: %w (%v)", err, string(out))
 	}
 	return nil
 }
@@ -503,7 +503,7 @@ func (i *interactor) Fetch(arg ...string) error {
 	arg = append([]string{"fetch", remote}, arg...)
 	i.logger.Infof("Fetching from %s", remote)
 	if out, err := i.executor.Run(arg...); err != nil {
-		return fmt.Errorf("error fetching: %w %v", err, string(out))
+		return fmt.Errorf("error fetching: %w (%v)", err, string(out))
 	}
 	return nil
 }
@@ -583,7 +583,7 @@ func (i *interactor) MergeCommitsExistBetween(target, head string) (bool, error)
 	i.logger.Infof("Determining if merge commits exist between %q and %q", target, head)
 	out, err := i.executor.Run("log", fmt.Sprintf("%s..%s", target, head), "--oneline", "--merges")
 	if err != nil {
-		return false, fmt.Errorf("error verifying if merge commits exist between %q and %q: %v %s", target, head, err, string(out))
+		return false, fmt.Errorf("error verifying if merge commits exist between %q and %q: %w %s", target, head, err, string(out))
 	}
 	return len(out) != 0, nil
 }

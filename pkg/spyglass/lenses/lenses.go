@@ -141,7 +141,7 @@ func LastNLinesChunked(a api.Artifact, n, chunkSize int64) ([]string, error) {
 		}
 		bytesRead := make([]byte, toRead)
 		numBytesRead, err := a.ReadAt(bytesRead, offset)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return nil, fmt.Errorf("error reading artifact: %w", err)
 		}
 		lastRead = int64(numBytesRead)

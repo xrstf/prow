@@ -20,6 +20,7 @@ limitations under the License.
 package size
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -107,11 +108,10 @@ func handlePR(gc githubClient, sizes plugins.Size, le *logrus.Entry, pe github.P
 
 	gf, err := genfiles.NewGroup(gc, owner, repo, sha)
 	if err != nil {
-		switch err.(type) {
-		case *genfiles.ParseError:
+		if parseErr := (&genfiles.ParseError{}); errors.As(err, &parseErr) {
 			// Continue on parse errors, but warn that something is wrong.
 			le.Warnf("error while parsing .generated_files: %v", err)
-		default:
+		} else {
 			return err
 		}
 	}

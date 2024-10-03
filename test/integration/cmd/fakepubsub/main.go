@@ -103,13 +103,13 @@ func startPubSubEmulator(o *options) error {
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("Could not start process: %v", err)
+		return fmt.Errorf("could not start process: %w", err)
 	}
 	logrus.Info("Started Pub/Sub emulator")
 
 	pgid, err := syscall.Getpgid(cmd.Process.Pid)
 	if err != nil {
-		return fmt.Errorf("Could not get pid: %v", err)
+		return fmt.Errorf("could not get pid: %w", err)
 	}
 
 	// Cleanup. Kill child processes (in our case, the emulator) if we detect
@@ -135,7 +135,7 @@ func startPubSubEmulator(o *options) error {
 func initEmulatorState(o *options) error {
 	configAgent, err := o.config.ConfigAgent()
 	if err != nil {
-		return fmt.Errorf("Error starting config agent: %v", err)
+		return fmt.Errorf("error starting config agent: %w", err)
 	}
 
 	subs := configAgent.Config().PubSubSubscriptions

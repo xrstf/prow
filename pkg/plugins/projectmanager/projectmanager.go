@@ -18,6 +18,7 @@ limitations under the License.
 package projectmanager
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -236,8 +237,8 @@ func getMatchingColumnIDs(gc githubClient, orgRepos map[string]plugins.ManagedOr
 					var err error
 					columnID, err = getColumnID(gc, orgRepoName, projectName, managedColumn.Name, issueURL)
 					if err != nil {
-						if err, ok := err.(*DuplicateCard); ok {
-							log.Infof("Card already exists for issue: %s, under project: %s", err.issueURL, err.projectName)
+						if dc := (&DuplicateCard{}); errors.As(err, &dc) {
+							log.Infof("Card already exists for issue: %s, under project: %s", dc.issueURL, dc.projectName)
 						}
 						log.Infof("Cannot add the issue/PR: %d to the project: %s, column: %s, error: %s", e.number, projectName, managedColumn.Name, err)
 

@@ -219,7 +219,7 @@ func (gr *gcsK8sReporter) reportPodInfo(ctx context.Context, log *logrus.Entry, 
 	overWriteOpts := io.WriterOptions{PreconditionDoesNotExist: ptr.To(false)}
 	podInfoPath, err := providers.StoragePath(bucketName, path.Join(dir, "podinfo.json"))
 	if err != nil {
-		return fmt.Errorf("failed to resolve podinfo.json path: %v", err)
+		return fmt.Errorf("failed to resolve podinfo.json path: %w", err)
 	}
 	if err := io.WriteContent(ctx, log, gr.opener, podInfoPath, output, overWriteOpts); err != nil {
 		return fmt.Errorf("failed to upload pod manifest to object storage: %w", err)

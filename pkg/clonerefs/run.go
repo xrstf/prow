@@ -324,7 +324,7 @@ func addSSHKeys(paths []string) ([]string, []clone.Command, error) {
 			}
 			cmds = append(cmds, cloneCmd)
 			if err != nil {
-				return fmt.Errorf("add ssh key at %s: %v: %s", path, err, output)
+				return fmt.Errorf("add ssh key at %s: %w: %s", path, err, output)
 			}
 			logrus.Infof("Added SSH key at %s", path)
 			return nil

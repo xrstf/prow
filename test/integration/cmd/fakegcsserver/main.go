@@ -109,7 +109,7 @@ func getInitialObjects(o *options) (*[]fakestorage.Object, error) {
 	initialObjects := []fakestorage.Object{}
 	configAgent, err := o.config.ConfigAgent()
 	if err != nil {
-		return &initialObjects, fmt.Errorf("Error starting config agent: %v", err)
+		return &initialObjects, fmt.Errorf("Error starting config agent: %w", err)
 	}
 
 	ddcs := configAgent.Config().Plank.DefaultDecorationConfigs

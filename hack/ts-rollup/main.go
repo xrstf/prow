@@ -191,7 +191,7 @@ func main() {
 				case pi := <-packageChan:
 					err := rollupOne(&pi, o.cleanupOnly)
 					if err != nil {
-						errChan <- fmt.Errorf("rollup package %q failed: %v", pi.Entrypoint, err)
+						errChan <- fmt.Errorf("rollup package %q failed: %w", pi.Entrypoint, err)
 					}
 					doneChan <- pi
 				case <-ctx.Done():

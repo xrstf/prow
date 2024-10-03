@@ -725,7 +725,7 @@ func (c *Client) GetBuilds(job string) (map[string]Build, error) {
 	data, err := c.Get(fmt.Sprintf("/job/%s/api/json?tree=builds[number,result,actions[parameters[name,value]]]", job))
 	if err != nil {
 		// Ignore 404s so we will not block processing the rest of the jobs.
-		if _, isNotFound := err.(NotFoundError); isNotFound {
+		if test := (NotFoundError{}); errors.As(err, &test) {
 			c.logger.WithError(err).Warnf("Cannot list builds for job %q", job)
 			return nil, nil
 		}

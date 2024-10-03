@@ -214,12 +214,12 @@ func handleSecrets(client ClientInterface, ctx context.Context, clientoptions cl
 		logrus.WithError(err).Info("Secret does not exist, now creating")
 		cert, privKey, caPem, err = createSecret(client, ctx, clientoptions)
 		if err != nil {
-			return "", "", fmt.Errorf("unable to create ca certificate %v", err)
+			return "", "", fmt.Errorf("unable to create ca certificate: %w", err)
 		}
 	} else {
 		err = json.Unmarshal(data, &secretsMap)
 		if err != nil {
-			return "", "", fmt.Errorf("error marshalling CA cert secret data: %v", err)
+			return "", "", fmt.Errorf("error marshalling CA cert secret data: %w", err)
 		}
 		cert = secretsMap[certFile]
 		privKey = secretsMap[privKeyFile]
@@ -227,7 +227,7 @@ func handleSecrets(client ClientInterface, ctx context.Context, clientoptions cl
 			logrus.WithError(err).Info("Certificate is not valid, will replace.")
 			cert, privKey, caPem, err = updateSecret(client, ctx, clientoptions)
 			if err != nil {
-				return "", "", fmt.Errorf("unable to update secret %v", err)
+				return "", "", fmt.Errorf("unable to update secret: %w", err)
 			}
 		}
 	}
@@ -236,15 +236,15 @@ func handleSecrets(client ClientInterface, ctx context.Context, clientoptions cl
 	}
 	tempDir, err := os.MkdirTemp("", "cert")
 	if err != nil {
-		return "", "", fmt.Errorf("unable to create temp directory %v", err)
+		return "", "", fmt.Errorf("unable to create temp directory: %w", err)
 	}
 	certFile := filepath.Join(tempDir, certFile)
 	if err := os.WriteFile(certFile, []byte(cert), 0666); err != nil {
-		return "", "", fmt.Errorf("could not write contents of cert file %v", err)
+		return "", "", fmt.Errorf("could not write contents of cert file: %w", err)
 	}
 	privKeyFile := filepath.Join(tempDir, privKeyFile)
 	if err := os.WriteFile(privKeyFile, []byte(privKey), 0666); err != nil {
-		return "", "", fmt.Errorf("could not write contents of privKey file %v", err)
+		return "", "", fmt.Errorf("could not write contents of privKey file: %w", err)
 	}
 	return certFile, privKeyFile, nil
 }

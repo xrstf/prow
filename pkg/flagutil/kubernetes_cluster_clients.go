@@ -402,7 +402,7 @@ func (o *KubernetesOptions) BuildClusters(dryRun bool, requiredTestPodVerbs []st
 			authzClient, err := authorizationv1.NewForConfig(&config)
 			if err != nil {
 				lock.Lock()
-				errs = append(errs, fmt.Errorf("failed to construct authz client for cluster %s: %s", name, err))
+				errs = append(errs, fmt.Errorf("failed to construct authz client for cluster %s: %w", name, err))
 				lock.Unlock()
 				return
 			}

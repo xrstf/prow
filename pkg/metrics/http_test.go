@@ -146,9 +146,8 @@ func TestRecordError(t *testing.T) {
 			errorRate := ErrorRate(tc.namespace)
 			RecordError(tc.expectedError, errorRate)
 			if err := testutil.CollectAndCompare(errorRate, strings.NewReader(tc.expectedOut)); err != nil {
-				t.Errorf("unexpected metrics for ErrorRate:\n%s", err)
+				t.Errorf("unexpected metrics for ErrorRate:\n%v", err)
 			}
-
 		})
 	}
 }
@@ -235,10 +234,10 @@ func TestHandleWithMetricsCustomTimer(t *testing.T) {
 			}
 			handler.ServeHTTP(rr, req)
 			if err := testutil.CollectAndCompare(httpResponseSize, strings.NewReader(tc.expectedResponseSizeOut)); err != nil {
-				t.Errorf("unexpected metrics for HTTPResponseSize:\n%s", err)
+				t.Errorf("unexpected metrics for HTTPResponseSize:\n%v", err)
 			}
 			if err := testutil.CollectAndCompare(httpRequestDuration, strings.NewReader(tc.expectedResponseTimeOut)); err != nil {
-				t.Errorf("unexpected metrics for HTTPRequestDuration:\n%s", err)
+				t.Errorf("unexpected metrics for HTTPRequestDuration:\n%v", err)
 			}
 		})
 	}

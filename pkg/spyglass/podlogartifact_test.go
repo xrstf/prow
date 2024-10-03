@@ -18,6 +18,7 @@ package spyglass
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"testing"
@@ -118,7 +119,7 @@ func TestNewPodLogArtifact(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			artifact, err := NewPodLogArtifact(tc.jobName, tc.buildID, tc.artifact, tc.container, tc.sizeLimit, &fakePodLogJAgent{})
 			if err != nil {
-				if err != tc.expectedErr {
+				if !errors.Is(err, tc.expectedErr) {
 					t.Fatalf("failed creating artifact. err: %v", err)
 				}
 				return
@@ -243,7 +244,7 @@ func TestReadAt_PodLog(t *testing.T) {
 			}
 			res := make([]byte, tc.n)
 			readBytes, err := artifact.ReadAt(res, tc.offset)
-			if err != tc.expectedErr {
+			if !errors.Is(err, tc.expectedErr) {
 				t.Fatalf("failed reading bytes of log. err: %v, expected err: %v", err, tc.expectedErr)
 			}
 			if !bytes.Equal(tc.expected, res[:readBytes]) {
@@ -289,7 +290,7 @@ func TestReadAtMost_PodLog(t *testing.T) {
 				t.Fatalf("Pod Log Tests failed to create pod log artifact, err %v", err)
 			}
 			res, err := artifact.ReadAtMost(tc.n)
-			if err != tc.expectedErr {
+			if !errors.Is(err, tc.expectedErr) {
 				t.Fatalf("failed reading bytes of log. err: %v, expected err: %v", err, tc.expectedErr)
 			}
 			if !bytes.Equal(tc.expected, res) {
@@ -440,7 +441,7 @@ func TestPodLogArtifact_RespectsSizeLimit(t *testing.T) {
 			sizeLimit := int64(2 * len(contents))
 			artifact, err := NewPodLogArtifact("job-name", "build-id", "log-name", "container-name", sizeLimit, &fakeAgent{contents: contents})
 			if err != nil {
-				nested.Fatalf("error creating test data: %s", err)
+				nested.Fatalf("error creating test data: %v", err)
 			}
 
 			actual := tc.action(artifact)
@@ -452,7 +453,7 @@ func TestPodLogArtifact_RespectsSizeLimit(t *testing.T) {
 			sizeLimit := int64(5)
 			artifact, err := NewPodLogArtifact("job-name", "build-id", "log-name", "container-name", sizeLimit, &fakeAgent{contents: contents})
 			if err != nil {
-				nested.Fatalf("error creating test data: %s", err)
+				nested.Fatalf("error creating test data: %v", err)
 			}
 
 			actual := tc.action(artifact)

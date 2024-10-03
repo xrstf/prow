@@ -17,6 +17,7 @@ limitations under the License.
 package assign
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -98,7 +99,7 @@ func parseLogins(text string) []string {
 
 func combineErrors(err1, err2 error) error {
 	if err1 != nil && err2 != nil {
-		return fmt.Errorf("two errors: 1) %v 2) %w", err1, err2)
+		return fmt.Errorf("two errors: 1) %s 2) %w", err1.Error(), err2)
 	} else if err1 != nil {
 		return err1
 	} else {
@@ -147,7 +148,7 @@ func handle(h *handler) error {
 	if len(toAdd) > 0 {
 		h.log.Printf("Adding %s to %s/%s#%d: %v", h.userType, org, repo, e.Number, toAdd)
 		if err := h.add(org, repo, e.Number, toAdd); err != nil {
-			if mu, ok := err.(github.MissingUsers); ok {
+			if mu := (github.MissingUsers{}); errors.As(err, &mu) {
 				msg := h.addFailureResponse(mu)
 				if len(msg) == 0 {
 					return nil

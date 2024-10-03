@@ -171,7 +171,7 @@ func TestSyncTimeThreadSafe(t *testing.T) {
 			latest := syncTime.DeepCopy()
 			latest["foo1"]["bar1"] = later
 			if err := st.Update(latest); err != nil {
-				threadErr = fmt.Errorf("failed update: %v", err)
+				threadErr = fmt.Errorf("failed update: %w", err)
 			}
 		}()
 
@@ -181,7 +181,7 @@ func TestSyncTimeThreadSafe(t *testing.T) {
 			latest := syncTime.DeepCopy()
 			latest["foo2"]["bar2"] = later
 			if err := st.Update(latest); err != nil {
-				threadErr = fmt.Errorf("failed update: %v", err)
+				threadErr = fmt.Errorf("failed update: %w", err)
 			}
 		}()
 
