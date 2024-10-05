@@ -144,7 +144,7 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p
 	var respBuilder strings.Builder
 	var ponyNameSpecified bool
 	for _, match := range matches {
-		for i := 0; i < retries; i++ {
+		for range retries {
 			if match[1] != "" {
 				ponyNameSpecified = true
 			}

@@ -941,7 +941,7 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 	var err error
 	backoff := c.initialDelay
 loop:
-	for retries := 0; retries < c.maxRetries; retries++ {
+	for retries := range c.maxRetries {
 		if retries > 0 && resp != nil {
 			resp.Body.Close()
 		}
@@ -4237,7 +4237,7 @@ func (c *client) ListIssueEvents(org, repo string, num int) ([]ListedIssueEvent,
 func (c *client) IsMergeable(org, repo string, number int, sha string) (bool, error) {
 	backoff := time.Second * 3
 	maxTries := 3
-	for try := 0; try < maxTries; try++ {
+	for try := range maxTries {
 		pr, err := c.GetPullRequest(org, repo, number)
 		if err != nil {
 			return false, err

@@ -124,7 +124,7 @@ crazy`,
 func TestLastNLines_GCS(t *testing.T) {
 	fakeGCSServerChunkSize := int64(3500)
 	var longLog string
-	for i := 0; i < 300; i++ {
+	for range 300 {
 		longLog += "here a log\nthere a log\neverywhere a log log\n"
 	}
 	testCases := []struct {

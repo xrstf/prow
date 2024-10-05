@@ -2109,7 +2109,7 @@ func TestMultipleWorks(t *testing.T) {
 			expectedCount := 1
 			expectedComment := []string{" out of " + strconv.Itoa(count), "ci-bar", "FAILURE", "guber/bar", "Comment `/retest`"}
 			var existingPJs []*v1.ProwJob
-			for i := 0; i < count; i++ {
+			for i := range count {
 				pj := samplePJ.DeepCopy()
 				pj.Spec.Job += strconv.Itoa(i)
 				if i%2 == 0 {
@@ -2165,7 +2165,7 @@ func TestMultipleWorks(t *testing.T) {
 			}
 
 			var reported bool
-			for i := 0; i < count; i++ {
+			for range count {
 				toReportJobs := <-resChan
 				if reported && len(toReportJobs) > 0 {
 					t.Fatalf("These jobs were already reported, should omit reporting again.")

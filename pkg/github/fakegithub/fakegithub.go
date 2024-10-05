@@ -1066,7 +1066,7 @@ func (f *FakeClient) CreatePullRequest(org, repo, title, body, head, base string
 	if f.Issues == nil {
 		f.Issues = map[int]*github.Issue{}
 	}
-	for i := 0; i < 999; i++ {
+	for i := range 999 {
 		if f.PullRequests[i] != nil || f.Issues[i] != nil {
 			continue
 		}

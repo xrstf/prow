@@ -378,7 +378,7 @@ func (c *Client) request(method, path string, params url.Values, measure bool) (
 	}
 
 	start := time.Now()
-	for retries := 0; retries < maxRetries; retries++ {
+	for retries := range maxRetries {
 		resp, err = c.doRequest(method, urlPath)
 		if err == nil && resp.StatusCode < 500 {
 			break

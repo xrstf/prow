@@ -336,7 +336,7 @@ func (c *Controller) processSingleProject(instance, project string) {
 	if poolSize > len(changes) {
 		poolSize = len(changes)
 	}
-	for i := 0; i < poolSize; i++ {
+	for range poolSize {
 		go c.processChange(latest, changeChan, log, &wg, syncTime)
 	}
 	// We need to call time.Now() outside this loop since <- will block
@@ -634,7 +634,7 @@ func (c *Controller) triggerJobs(logger logrus.FieldLogger, instance string, cha
 		var postsubmits []config.Postsubmit
 		// Gerrit server might be unavailable intermittently, retry inrepoconfig
 		// processing for increased reliability.
-		for attempt := 0; attempt < inRepoConfigRetries; attempt++ {
+		for range inRepoConfigRetries {
 			postsubmits, err = c.inRepoConfigGetter.GetPostsubmits(cloneURI, change.Branch, baseSHAGetter, headSHAGetter)
 			// Break if there was no error, or if there was a merge conflict
 			if err == nil {
@@ -680,7 +680,7 @@ func (c *Controller) triggerJobs(logger logrus.FieldLogger, instance string, cha
 		var presubmits []config.Presubmit
 		// Gerrit server might be unavailable intermittently, retry inrepoconfig
 		// processing for increased reliability.
-		for attempt := 0; attempt < inRepoConfigRetries; attempt++ {
+		for range inRepoConfigRetries {
 			presubmits, err = c.inRepoConfigGetter.GetPresubmits(cloneURI, change.Branch, baseSHAGetter, headSHAGetter)
 			if err == nil {
 				break

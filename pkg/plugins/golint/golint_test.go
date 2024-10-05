@@ -203,7 +203,7 @@ func testLint(clients localgit.Clients, t *testing.T) {
 
 	// Test that we limit comments.
 	badFileLines := []string{"package baz", ""}
-	for i := 0; i < maxComments+5; i++ {
+	for i := range maxComments + 5 {
 		badFileLines = append(badFileLines, fmt.Sprintf("type PublicType%d int", i))
 	}
 	gh.changes = append(gh.changes, github.PullRequestChange{

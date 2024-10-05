@@ -208,7 +208,7 @@ func (c *controller) Run(threads int, stop <-chan struct{}) error {
 	}
 
 	logrus.Info("Starting workers")
-	for i := 0; i < threads; i++ {
+	for range threads {
 		go wait.Until(c.runWorker, time.Second, stop)
 	}
 
@@ -414,7 +414,7 @@ func abortDuplicatedProwJobs(c reconciler, pj *prowjobv1.ProwJob) (*prowjobv1.Pr
 	}
 	pjs := getFilteredProwJobs(id, prowJobsToFilter)
 	// do not abort the newest prowjob
-	for i := 0; i < len(pjs)-1; i++ {
+	for i := range len(pjs) - 1 {
 		newpj := pjs[i].DeepCopy()
 		now := c.now()
 		newpj.Status.State = prowjobv1.AbortedState

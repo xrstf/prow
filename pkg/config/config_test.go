@@ -8745,7 +8745,7 @@ func TestContextDescriptionWithBaseShaRoundTripping(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			for i := 0; i < 100; i++ {
+			for range 100 {
 				var humanReadable string
 				fuzz.New().Fuzz(&humanReadable)
 				contextDescription := ContextDescriptionWithBaseSha(humanReadable, tc.shaIn)
@@ -8953,7 +8953,7 @@ func TestHasConfigFor(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			for i := 0; i < 100; i++ {
+			for range 100 {
 				fuzzedConfig := &ProwConfig{}
 				fuzzedConfig.SlackReporterConfigs = SlackReporterConfigs{}
 				fuzzer.Fuzz(fuzzedConfig)
@@ -8973,7 +8973,6 @@ func TestHasConfigFor(t *testing.T) {
 					t.Errorf("expected repos differ from actual: %s", diff)
 				}
 			}
-
 		})
 	}
 }
@@ -9165,7 +9164,7 @@ func TestProwConfigMergingProperties(t *testing.T) {
 			for _, propertyTest := range expectedProperties {
 				t.Run(propertyTest.name, func(t *testing.T) {
 
-					for i := 0; i < 100; i++ {
+					for range 100 {
 						fuzzedConfig := &ProwConfig{}
 						fuzzedConfig.SlackReporterConfigs = map[string]SlackReporter{}
 						fuzzer.Fuzz(fuzzedConfig)
@@ -9191,7 +9190,7 @@ func TestEnsureConfigIsDiffable(t *testing.T) {
 // don't forget to change our code when new fields get added to the type.
 func TestDeduplicateTideQueriesDoesntLoseData(t *testing.T) {
 	config := &Config{}
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			query := TideQuery{}
 			fuzz.New().Fuzz(&query)

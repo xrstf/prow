@@ -223,7 +223,7 @@ func TestProwJobLifecycleCollectorUpdate(t *testing.T) {
 			}},
 	}
 	for _, tt := range tests {
-		for x := 0; x < len(tt.oldJobStates); x++ {
+		for x := range len(tt.oldJobStates) {
 			t.Run(fmt.Sprintf(tt.name, tt.oldJobStates[x], tt.newJobStates[x]), func(t *testing.T) {
 				histogramVec := newHistogramVec()
 				tt.args.oldJob.Status.State = tt.oldJobStates[x]
@@ -253,7 +253,7 @@ func assertMetrics(t *testing.T, actual, expected []*dto.Metric, lastState prowa
 		t.Errorf("actual length differs from expected: %v, %v", len(actual), len(expected))
 		return
 	}
-	for x := 0; x < len(actual); x++ {
+	for x := range actual {
 		expected[x].Label[3] = toLabelPair("last_state", string(lastState))
 		expected[x].Label[6] = toLabelPair("state", string(state))
 		if !reflect.DeepEqual(actual[x].Label, expected[x].Label) {

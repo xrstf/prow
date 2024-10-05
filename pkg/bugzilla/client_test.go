@@ -485,7 +485,7 @@ This is another comment.`,
 	baseComment := Comment{Text: "This is a test comment"}
 	comments := []Comment{}
 	// Make sure comments are at lest 65535 in total length
-	for i := 0; i < (65535 / len(baseComment.Text)); i++ {
+	for range 65535 / len(baseComment.Text) {
 		comments = append(comments, baseComment)
 	}
 	newBug := cloneBugStruct(&bug, nil, comments)

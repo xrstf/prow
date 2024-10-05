@@ -41,7 +41,7 @@ func PopulateStruct(in interface{}) interface{} {
 		return in
 	}
 	valueOf := reflect.ValueOf(in)
-	for i := 0; i < typeOf.Elem().NumField(); i++ {
+	for i := range typeOf.Elem().NumField() {
 		// Unexported
 		if !valueOf.Elem().Field(i).CanSet() {
 			continue
