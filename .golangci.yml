@@ -28,6 +28,7 @@ linters:
     - intrange
     - misspell
     - nolintlint
+    - nosprintfhostport
     - staticcheck
     - unused
   disable-all: true
