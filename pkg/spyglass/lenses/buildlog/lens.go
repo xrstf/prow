@@ -232,11 +232,12 @@ func (lens Lens) Body(artifacts []api.Artifact, resourceDir string, data string,
 
 		for key, val := range meta {
 			var targ *int
-			if key == focusStart {
+			switch key {
+			case focusStart:
 				targ = &start
-			} else if key == focusEnd {
+			case focusEnd:
 				targ = &end
-			} else {
+			default:
 				continue
 			}
 

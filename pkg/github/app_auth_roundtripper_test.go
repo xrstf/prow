@@ -57,7 +57,6 @@ func (frt *fakeRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) 
 }
 
 func TestAppsAuth(t *testing.T) {
-
 	const appID = "13"
 	testCases := []struct {
 		name                string

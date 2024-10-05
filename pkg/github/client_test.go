@@ -767,12 +767,12 @@ func TestGetSingleCommit(t *testing.T) {
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 		fmt.Fprint(w, `{
-			"commit": {
-			  "tree": {
-				"sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
-			  }
-		        }
-		  }`)
+  "commit": {
+    "tree": {
+      "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+    }
+  }
+}`)
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
@@ -818,7 +818,8 @@ func TestListIssues(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Bad method: %s", r.Method)
 		}
-		if r.URL.Path == "/repos/k8s/kuber/issues" {
+		switch r.URL.Path {
+		case "/repos/k8s/kuber/issues":
 			ics := []Issue{{Number: 1}}
 			b, err := json.Marshal(ics)
 			if err != nil {
@@ -826,25 +827,25 @@ func TestListIssues(t *testing.T) {
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
 			fmt.Fprint(w, string(b))
-		} else if r.URL.Path == "/someotherpath" {
+		case "/someotherpath":
 			ics := []Issue{{Number: 2}}
 			b, err := json.Marshal(ics)
 			if err != nil {
 				t.Fatalf("Didn't expect error: %v", err)
 			}
 			fmt.Fprint(w, string(b))
-		} else {
+		default:
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	ics, err := c.ListOpenIssues("k8s", "kuber")
-	if err != nil {
+	switch ics, err := c.ListOpenIssues("k8s", "kuber"); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(ics) != 2 {
+	case len(ics) != 2:
 		t.Errorf("Expected two issues, found %d: %v", len(ics), ics)
-	} else if ics[0].Number != 1 || ics[1].Number != 2 {
+	case ics[0].Number != 1 || ics[1].Number != 2:
 		t.Errorf("Wrong issue IDs: %v", ics)
 	}
 }
@@ -854,7 +855,8 @@ func TestListIssueComments(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Bad method: %s", r.Method)
 		}
-		if r.URL.Path == "/repos/k8s/kuber/issues/15/comments" {
+		switch r.URL.Path {
+		case "/repos/k8s/kuber/issues/15/comments":
 			ics := []IssueComment{{ID: 1}}
 			b, err := json.Marshal(ics)
 			if err != nil {
@@ -862,25 +864,25 @@ func TestListIssueComments(t *testing.T) {
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
 			fmt.Fprint(w, string(b))
-		} else if r.URL.Path == "/someotherpath" {
+		case "/someotherpath":
 			ics := []IssueComment{{ID: 2}}
 			b, err := json.Marshal(ics)
 			if err != nil {
 				t.Fatalf("Didn't expect error: %v", err)
 			}
 			fmt.Fprint(w, string(b))
-		} else {
+		default:
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	ics, err := c.ListIssueComments("k8s", "kuber", 15)
-	if err != nil {
+	switch ics, err := c.ListIssueComments("k8s", "kuber", 15); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(ics) != 2 {
+	case len(ics) != 2:
 		t.Errorf("Expected two issues, found %d: %v", len(ics), ics)
-	} else if ics[0].ID != 1 || ics[1].ID != 2 {
+	case ics[0].ID != 1 || ics[1].ID != 2:
 		t.Errorf("Wrong issue IDs: %v", ics)
 	}
 }
@@ -1096,7 +1098,6 @@ func TestIsNotFound_nested(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestAssignIssue(t *testing.T) {
@@ -1112,20 +1113,20 @@ func TestAssignIssue(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string][]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err := json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 1 {
+		case len(ps) != 1:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if len(ps["assignees"]) == 3 {
+		case len(ps["assignees"]) == 3:
 			if ps["assignees"][0] != "george" || ps["assignees"][1] != "jungle" || ps["assignees"][2] != "not-in-the-org" {
 				t.Errorf("Wrong assignees: %v", ps)
 			}
-		} else if len(ps["assignees"]) == 2 {
+		case len(ps["assignees"]) == 2:
 			if ps["assignees"][0] != "george" || ps["assignees"][1] != "jungle" {
 				t.Errorf("Wrong assignees: %v", ps)
 			}
-
-		} else {
+		default:
 			t.Errorf("Wrong assignees length: %v", ps)
 		}
 		w.WriteHeader(http.StatusCreated)
@@ -1162,20 +1163,20 @@ func TestUnassignIssue(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string][]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err := json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 1 {
+		case len(ps) != 1:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if len(ps["assignees"]) == 3 {
+		case len(ps["assignees"]) == 3:
 			if ps["assignees"][0] != "george" || ps["assignees"][1] != "jungle" || ps["assignees"][2] != "perma-assignee" {
 				t.Errorf("Wrong assignees: %v", ps)
 			}
-		} else if len(ps["assignees"]) == 2 {
+		case len(ps["assignees"]) == 2:
 			if ps["assignees"][0] != "george" || ps["assignees"][1] != "jungle" {
 				t.Errorf("Wrong assignees: %v", ps)
 			}
-
-		} else {
+		default:
 			t.Errorf("Wrong assignees length: %v", ps)
 		}
 		json.NewEncoder(w).Encode(Issue{
@@ -1261,7 +1262,7 @@ func TestReadPaginatedResults(t *testing.T) {
 		defer ts.Close()
 
 		c := getClient(ts.URL)
-		c.bases[0] = c.bases[0] + tc.baseSuffix
+		c.bases[0] += tc.baseSuffix
 		var labels []Label
 		err := c.readPaginatedResults(
 			tc.initialPath,
@@ -1276,10 +1277,8 @@ func TestReadPaginatedResults(t *testing.T) {
 		)
 		if err != nil {
 			t.Errorf("%s: didn't expect error: %v", tc.name, err)
-		} else {
-			if !reflect.DeepEqual(labels, tc.expectedLabels) {
-				t.Errorf("%s: expected %s, got %s", tc.name, tc.expectedLabels, labels)
-			}
+		} else if !reflect.DeepEqual(labels, tc.expectedLabels) {
+			t.Errorf("%s: expected %s, got %s", tc.name, tc.expectedLabels, labels)
 		}
 	}
 }
@@ -1289,7 +1288,8 @@ func TestListPullRequestComments(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Bad method: %s", r.Method)
 		}
-		if r.URL.Path == "/repos/k8s/kuber/pulls/15/comments" {
+		switch r.URL.Path {
+		case "/repos/k8s/kuber/pulls/15/comments":
 			prcs := []ReviewComment{{ID: 1}}
 			b, err := json.Marshal(prcs)
 			if err != nil {
@@ -1297,25 +1297,25 @@ func TestListPullRequestComments(t *testing.T) {
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
 			fmt.Fprint(w, string(b))
-		} else if r.URL.Path == "/someotherpath" {
+		case "/someotherpath":
 			prcs := []ReviewComment{{ID: 2}}
 			b, err := json.Marshal(prcs)
 			if err != nil {
 				t.Fatalf("Didn't expect error: %v", err)
 			}
 			fmt.Fprint(w, string(b))
-		} else {
+		default:
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	prcs, err := c.ListPullRequestComments("k8s", "kuber", 15)
-	if err != nil {
+	switch prcs, err := c.ListPullRequestComments("k8s", "kuber", 15); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(prcs) != 2 {
+	case len(prcs) != 2:
 		t.Errorf("Expected two comments, found %d: %v", len(prcs), prcs)
-	} else if prcs[0].ID != 1 || prcs[1].ID != 2 {
+	case prcs[0].ID != 1 || prcs[1].ID != 2:
 		t.Errorf("Wrong issue IDs: %v", prcs)
 	}
 }
@@ -1325,7 +1325,8 @@ func TestListReviews(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Bad method: %s", r.Method)
 		}
-		if r.URL.Path == "/repos/k8s/kuber/pulls/15/reviews" {
+		switch r.URL.Path {
+		case "/repos/k8s/kuber/pulls/15/reviews":
 			reviews := []Review{{ID: 1}}
 			b, err := json.Marshal(reviews)
 			if err != nil {
@@ -1333,25 +1334,25 @@ func TestListReviews(t *testing.T) {
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
 			fmt.Fprint(w, string(b))
-		} else if r.URL.Path == "/someotherpath" {
+		case "/someotherpath":
 			reviews := []Review{{ID: 2}}
 			b, err := json.Marshal(reviews)
 			if err != nil {
 				t.Fatalf("Didn't expect error: %v", err)
 			}
 			fmt.Fprint(w, string(b))
-		} else {
+		default:
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	reviews, err := c.ListReviews("k8s", "kuber", 15)
-	if err != nil {
+	switch reviews, err := c.ListReviews("k8s", "kuber", 15); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(reviews) != 2 {
+	case len(reviews) != 2:
 		t.Errorf("Expected two reviews, found %d: %v", len(reviews), reviews)
-	} else if reviews[0].ID != 1 || reviews[1].ID != 2 {
+	case reviews[0].ID != 1 || reviews[1].ID != 2:
 		t.Errorf("Wrong review IDs: %v", reviews)
 	}
 }
@@ -1489,19 +1490,20 @@ func TestUnrequestReview(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string][]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err := json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 1 {
+		case len(ps) != 1:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if len(ps["reviewers"]) == 3 {
+		case len(ps["reviewers"]) == 3:
 			if ps["reviewers"][0] != "george" || ps["reviewers"][1] != "jungle" || ps["reviewers"][2] != "perma-reviewer" {
 				t.Errorf("Wrong reviewers: %v", ps)
 			}
-		} else if len(ps["reviewers"]) == 2 {
+		case len(ps["reviewers"]) == 2:
 			if ps["reviewers"][0] != "george" || ps["reviewers"][1] != "jungle" {
 				t.Errorf("Wrong reviewers: %v", ps)
 			}
-		} else {
+		default:
 			t.Errorf("Wrong reviewers length: %v", ps)
 		}
 		json.NewEncoder(w).Encode(PullRequest{
@@ -1537,13 +1539,14 @@ func TestCloseIssue(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err := json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 2 {
+		case len(ps) != 2:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if ps["state"] != "closed" {
+		case ps["state"] != "closed":
 			t.Errorf("Wrong state: %s", ps["state"])
-		} else if ps["state_reason"] != "completed" {
+		case ps["state_reason"] != "completed":
 			t.Errorf("Wrong state_reason: %s", ps["state_reason"])
 		}
 	}))
@@ -1567,13 +1570,14 @@ func TestCloseIssueAsNotPlanned(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err = json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 2 {
+		case len(ps) != 2:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if ps["state"] != "closed" {
+		case ps["state"] != "closed":
 			t.Errorf("Wrong state: %s", ps["state"])
-		} else if ps["state_reason"] != "not_planned" {
+		case ps["state_reason"] != "not_planned":
 			t.Errorf("Wrong state_reason: %s", ps["state_reason"])
 		}
 	}))
@@ -1597,11 +1601,12 @@ func TestReopenIssue(t *testing.T) {
 			t.Fatalf("Could not read request body: %v", err)
 		}
 		var ps map[string]string
-		if err := json.Unmarshal(b, &ps); err != nil {
+		switch err = json.Unmarshal(b, &ps); {
+		case err != nil:
 			t.Errorf("Could not unmarshal request: %v", err)
-		} else if len(ps) != 1 {
+		case len(ps) != 1:
 			t.Errorf("Wrong length patch: %v", ps)
-		} else if ps["state"] != "open" {
+		case ps["state"] != "open":
 			t.Errorf("Wrong state: %s", ps["state"])
 		}
 	}))
@@ -1896,21 +1901,22 @@ func TestGetLabels(t *testing.T) {
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	labels, err := c.GetIssueLabels("k8s", "kuber", 5)
-	if err != nil {
+
+	switch labels, err := c.GetIssueLabels("k8s", "kuber", 5); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(labels) != 2 {
+	case len(labels) != 2:
 		t.Errorf("Expected two labels, found %d: %v", len(labels), labels)
-	} else if labels[0].Name != "issue-label" || labels[1].Name != "label2" {
+	case labels[0].Name != "issue-label" || labels[1].Name != "label2":
 		t.Errorf("Wrong label names: %v", labels)
 	}
 
-	labels, err = c.GetRepoLabels("k8s", "kuber")
-	if err != nil {
+	switch labels, err := c.GetRepoLabels("k8s", "kuber"); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(labels) != 2 {
+	case len(labels) != 2:
 		t.Errorf("Expected two labels, found %d: %v", len(labels), labels)
-	} else if labels[0].Name != "repo-label" || labels[1].Name != "label2" {
+	case labels[0].Name != "repo-label" || labels[1].Name != "label2":
 		t.Errorf("Wrong label names: %v", labels)
 	}
 }
@@ -1934,12 +1940,12 @@ func TestListTeams(t *testing.T) {
 	ts := simpleTestServer(t, "/orgs/foo/teams", []Team{{ID: 1}}, http.StatusOK)
 	defer ts.Close()
 	c := getClient(ts.URL)
-	teams, err := c.ListTeams("foo")
-	if err != nil {
+	switch teams, err := c.ListTeams("foo"); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(teams) != 1 {
+	case len(teams) != 1:
 		t.Errorf("Expected one team, found %d: %v", len(teams), teams)
-	} else if teams[0].ID != 1 {
+	case teams[0].ID != 1:
 		t.Errorf("Wrong team names: %v", teams)
 	}
 }
@@ -2051,12 +2057,13 @@ func TestListTeamMembers(t *testing.T) {
 	ts := simpleTestServer(t, "/teams/1/members", []TeamMember{{Login: "foo"}}, http.StatusOK)
 	defer ts.Close()
 	c := getClient(ts.URL)
-	teamMembers, err := c.ListTeamMembers("orgName", 1, RoleAll)
-	if err != nil {
+
+	switch teamMembers, err := c.ListTeamMembers("orgName", 1, RoleAll); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(teamMembers) != 1 {
+	case len(teamMembers) != 1:
 		t.Errorf("Expected one team member, found %d: %v", len(teamMembers), teamMembers)
-	} else if teamMembers[0].Login != "foo" {
+	case teamMembers[0].Login != "foo":
 		t.Errorf("Wrong team names: %v", teamMembers)
 	}
 }
@@ -2065,12 +2072,13 @@ func TestListTeamMembersBySlug(t *testing.T) {
 	ts := simpleTestServer(t, "/orgs/orgName/teams/team-name/members", []TeamMember{{Login: "foo"}}, http.StatusOK)
 	defer ts.Close()
 	c := getClient(ts.URL)
-	teamMembers, err := c.ListTeamMembersBySlug("orgName", "team-name", RoleAll)
-	if err != nil {
+
+	switch teamMembers, err := c.ListTeamMembersBySlug("orgName", "team-name", RoleAll); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(teamMembers) != 1 {
+	case len(teamMembers) != 1:
 		t.Errorf("Expected one team member, found %d: %v", len(teamMembers), teamMembers)
-	} else if teamMembers[0].Login != "foo" {
+	case teamMembers[0].Login != "foo":
 		t.Errorf("Wrong team names: %v", teamMembers)
 	}
 }
@@ -2547,10 +2555,8 @@ func TestListPRCommits(t *testing.T) {
 	c := getClient(ts.URL)
 	if commits, err := c.ListPullRequestCommits("theorg", "therepo", 3); err != nil {
 		t.Errorf("Didn't expect error: %v", err)
-	} else {
-		if len(commits) != 2 {
-			t.Errorf("Expected 2 commits to be returned, but got %d", len(commits))
-		}
+	} else if len(commits) != 2 {
+		t.Errorf("Expected 2 commits to be returned, but got %d", len(commits))
 	}
 }
 
@@ -2609,11 +2615,12 @@ func TestUpdatePullRequestBranch(t *testing.T) {
 				t.Errorf("Could not unmarshal request: %v", err)
 			}
 
-			if data.ExpectedHeadSha != nil && *data.ExpectedHeadSha != sha {
+			switch {
+			case data.ExpectedHeadSha != nil && *data.ExpectedHeadSha != sha:
 				http.Error(w, "422 Unprocessable Entity", http.StatusUnprocessableEntity)
-			} else if tc.forceMismatch == true {
+			case tc.forceMismatch == true:
 				http.Error(w, "422 Unprocessable Entity", http.StatusUnprocessableEntity)
-			} else {
+			default:
 				http.Error(w, "202 Accepted", http.StatusAccepted)
 			}
 		}))
@@ -2635,7 +2642,8 @@ func TestCombinedStatus(t *testing.T) {
 		if r.Method != http.MethodGet {
 			t.Errorf("Bad method: %s", r.Method)
 		}
-		if r.URL.Path == "/repos/k8s/kuber/commits/SHA/status" {
+		switch r.URL.Path {
+		case "/repos/k8s/kuber/commits/SHA/status":
 			statuses := CombinedStatus{
 				SHA:      "SHA",
 				Statuses: []Status{{Context: "foo"}},
@@ -2646,7 +2654,7 @@ func TestCombinedStatus(t *testing.T) {
 			}
 			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
 			fmt.Fprint(w, string(b))
-		} else if r.URL.Path == "/someotherpath" {
+		case "/someotherpath":
 			statuses := CombinedStatus{
 				SHA:      "SHA",
 				Statuses: []Status{{Context: "bar"}},
@@ -2656,20 +2664,20 @@ func TestCombinedStatus(t *testing.T) {
 				t.Fatalf("Didn't expect error: %v", err)
 			}
 			fmt.Fprint(w, string(b))
-		} else {
+		default:
 			t.Errorf("Bad request path: %s", r.URL.Path)
 		}
 	}))
 	defer ts.Close()
 	c := getClient(ts.URL)
-	combined, err := c.GetCombinedStatus("k8s", "kuber", "SHA")
-	if err != nil {
+	switch combined, err := c.GetCombinedStatus("k8s", "kuber", "SHA"); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if combined.SHA != "SHA" {
+	case combined.SHA != "SHA":
 		t.Errorf("Expected SHA 'SHA', found %s", combined.SHA)
-	} else if len(combined.Statuses) != 2 {
+	case len(combined.Statuses) != 2:
 		t.Errorf("Expected two statuses, found %d: %v", len(combined.Statuses), combined.Statuses)
-	} else if combined.Statuses[0].Context != "foo" || combined.Statuses[1].Context != "bar" {
+	case combined.Statuses[0].Context != "foo" || combined.Statuses[1].Context != "bar":
 		t.Errorf("Wrong review IDs: %v", combined.Statuses)
 	}
 }
@@ -2929,12 +2937,12 @@ func TestListTeamReposBySlug(t *testing.T) {
 		{Name: "repo-invalid-permission-level"}}, http.StatusOK)
 	defer ts.Close()
 	c := getClient(ts.URL)
-	repos, err := c.ListTeamReposBySlug("orgName", "team-name")
-	if err != nil {
+	switch repos, err := c.ListTeamReposBySlug("orgName", "team-name"); {
+	case err != nil:
 		t.Errorf("Didn't expect error: %v", err)
-	} else if len(repos) != 1 {
+	case len(repos) != 1:
 		t.Errorf("Expected one repo, found %d: %v", len(repos), repos)
-	} else if repos[0].Name != "repo-bar" {
+	case repos[0].Name != "repo-bar":
 		t.Errorf("Wrong repos: %v", repos)
 	}
 }
@@ -2999,10 +3007,8 @@ func TestCreateFork(t *testing.T) {
 	c := getClient(ts.URL)
 	if name, err := c.CreateFork("k8s", "kuber"); err != nil {
 		t.Errorf("Unexpected error: %v", err)
-	} else {
-		if name != "other" {
-			t.Errorf("Unexpected fork name: %v", name)
-		}
+	} else if name != "other" {
+		t.Errorf("Unexpected fork name: %v", name)
 	}
 }
 

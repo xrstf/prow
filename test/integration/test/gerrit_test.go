@@ -159,9 +159,9 @@ func TestGerrit(t *testing.T) {
 
 }
 
-func expectedMessagesReceivedFunc(gerritClient *client.Client, ChangeID string, expectedMessages []string) wait.ConditionWithContextFunc {
+func expectedMessagesReceivedFunc(gerritClient *client.Client, changeID string, expectedMessages []string) wait.ConditionWithContextFunc {
 	return func(ctx context.Context) (bool, error) {
-		resp, err := gerritClient.GetChange(gerritServer, ChangeID)
+		resp, err := gerritClient.GetChange(gerritServer, changeID)
 		if err != nil {
 			return false, nil
 		}

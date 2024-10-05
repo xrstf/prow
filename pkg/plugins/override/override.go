@@ -392,11 +392,12 @@ func handle(oc overrideClient, log *logrus.Entry, e *github.GenericCommentEvent,
 		checkrunContexts = make([]Context, len(checkruns.CheckRuns))
 		for _, checkrun := range checkruns.CheckRuns {
 			var state string
-			if checkrun.CompletedAt == "" {
+			switch {
+			case checkrun.CompletedAt == "":
 				state = "PENDING"
-			} else if strings.ToUpper(checkrun.Conclusion) == "NEUTRAL" {
+			case strings.ToUpper(checkrun.Conclusion) == "NEUTRAL":
 				state = "SUCCESS"
-			} else {
+			default:
 				state = strings.ToUpper(checkrun.Conclusion)
 			}
 			checkrunContexts = append(checkrunContexts, Context{

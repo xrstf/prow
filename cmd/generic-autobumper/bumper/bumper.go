@@ -483,7 +483,7 @@ func MakeGitCommit(remote, remoteBranch, name, email string, stdout, stderr io.W
 }
 
 func makeGerritCommit(summary, commitTag, changeId string) string {
-	//Gerrit commits do not recognize "&#x2011;" as NON-BREAKING HYPHEN, so just replace with a regular hyphen.
+	// Gerrit commits do not recognize "&#x2011;" as NON-BREAKING HYPHEN, so just replace with a regular hyphen.
 	return fmt.Sprintf("%s\n\n[%s]\n\nChange-Id: %s", strings.ReplaceAll(summary, "&#x2011;", "-"), commitTag, changeId)
 }
 
@@ -708,7 +708,7 @@ func getChangeId(gerritAuthor, commitTag, startingID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	//While a commit on the base branch exists with this change ID...
+	// While a commit on the base branch exists with this change ID...
 	for strings.Contains(gitLog, id) {
 		// Choose another ID by hashing the current ID.
 		id = "I" + GitHash(id)

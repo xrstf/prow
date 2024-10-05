@@ -27,9 +27,9 @@ type GerritFields struct {
 	MaxQPS, MaxBurst int // No throttling when unset.
 }
 
-func (o *GerritOptions) SetDefaultThrottle(MaxQPS, MaxBurst int) {
-	o.defaults.MaxQPS = MaxQPS
-	o.defaults.MaxBurst = MaxBurst
+func (o *GerritOptions) SetDefaultThrottle(maxQPS, maxBurst int) {
+	o.defaults.MaxQPS = maxQPS
+	o.defaults.MaxBurst = maxBurst
 }
 
 func (o *GerritOptions) AddFlags(fs *flag.FlagSet) {

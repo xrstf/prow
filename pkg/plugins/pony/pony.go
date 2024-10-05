@@ -54,7 +54,7 @@ const (
 )
 
 var (
-	match = regexp.MustCompile(`(?mi)^/(?:pony)(?: +(.+?))?\s*$`)
+	ponyExpr = regexp.MustCompile(`(?mi)^/(?:pony)(?: +(.+?))?\s*$`)
 )
 
 func init() {
@@ -100,7 +100,7 @@ func (h realHerd) readPony(tags string) (string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("no pony found")
+		return "", errors.New("no pony found")
 	}
 	var a ponyResult
 	if err = json.NewDecoder(resp.Body).Decode(&a); err != nil {
@@ -113,38 +113,42 @@ func (h realHerd) readPony(tags string) (string, error) {
 		return "", fmt.Errorf("couldn't fetch pony for size check: %w", err)
 	}
 	if tooBig {
-		return "", fmt.Errorf("the pony is too big")
+		return "", errors.New("the pony is too big")
 	}
 	return formatURLs(a.Pony.Representations.Small, a.Pony.Representations.Full), nil
 }
 
 func handleGenericComment(pc plugins.Agent, e github.GenericCommentEvent) error {
-	return handle(pc.GitHubClient, pc.Logger, &e, ponyURL)
+	_, err := handle(pc.GitHubClient, pc.Logger, &e, ponyURL)
+	return err
 }
 
-func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p herd) error {
+func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p herd) (ponies int, err error) {
 	// Only consider new comments.
 	if e.Action != github.GenericCommentActionCreated {
-		return nil
+		return 0, nil
 	}
 	// Make sure they are requesting a pony and don't allow requesting more than 'maxPonies' defined.
-	mat := match.FindAllStringSubmatch(e.Body, maxPonies)
-	if mat == nil {
-		return nil
+	matches := ponyExpr.FindAllStringSubmatch(e.Body, maxPonies)
+	if matches == nil {
+		return 0, nil
 	}
+	ponies = len(matches)
 
 	org := e.Repo.Owner.Login
 	repo := e.Repo.Name
 	number := e.Number
 
+	const retries = 5
+
 	var respBuilder strings.Builder
-	var tagsSpecified bool
-	for _, tag := range mat {
-		for i := 0; i < 5; i++ {
-			if tag[1] != "" {
-				tagsSpecified = true
+	var ponyNameSpecified bool
+	for _, match := range matches {
+		for i := 0; i < retries; i++ {
+			if match[1] != "" {
+				ponyNameSpecified = true
 			}
-			resp, err := p.readPony(tag[1])
+			resp, err := p.readPony(match[1])
 			if err != nil {
 				log.WithError(err).Println("Failed to get a pony")
 				continue
@@ -154,11 +158,11 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p
 		}
 	}
 	if respBuilder.Len() > 0 {
-		return gc.CreateComment(org, repo, number, plugins.FormatResponseRaw(e.Body, e.HTMLURL, e.User.Login, respBuilder.String()))
+		return ponies, gc.CreateComment(org, repo, number, plugins.FormatResponseRaw(e.Body, e.HTMLURL, e.User.Login, respBuilder.String()))
 	}
 
 	var msg string
-	if tagsSpecified {
+	if ponyNameSpecified {
 		msg = "Couldn't find a pony matching given tag(s)."
 	} else {
 		msg = "https://theponyapi.com appears to be down"
@@ -167,5 +171,5 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p
 		log.WithError(err).Error("Failed to leave comment")
 	}
 
-	return errors.New("could not find a valid pony image")
+	return ponies, errors.New("could not find a valid pony image")
 }

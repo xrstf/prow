@@ -142,7 +142,7 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, r
 
 		toRepeat = append(toRepeat, sigMatch[0])
 	}
-	//TODO(grodrigues3): Once labels are standardized, make this reply with a comment.
+	// TODO(grodrigues3): Once labels are standardized, make this reply with a comment.
 	if len(nonexistent) > 0 {
 		log.Infof("Nonexistent labels: %v", nonexistent)
 	}

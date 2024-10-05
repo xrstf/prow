@@ -60,7 +60,7 @@ func helpProvider(config *plugins.Configuration, enabledRepos []config.OrgRepo) 
 	if len(enabledRepos) == 1 {
 		msg := ""
 		for configFileName, configMapSpec := range config.ConfigUpdater.Maps {
-			msg = msg + fmt.Sprintf(
+			msg += fmt.Sprintf(
 				"Files matching %s/%s are used to populate the %s ConfigMap in ",
 				enabledRepos[0],
 				configFileName,

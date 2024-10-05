@@ -71,10 +71,7 @@ type githubClient interface {
 }
 
 func handleGenericComment(pc plugins.Agent, e github.GenericCommentEvent) error {
-	hasLabel := func(label string, labels []github.Label) bool {
-		return github.HasLabel(label, labels)
-	}
-	return handle(pc.GitHubClient, pc.Logger, &e, hasLabel)
+	return handle(pc.GitHubClient, pc.Logger, &e, github.HasLabel)
 }
 
 // handle drives the pull request to the desired state. If any user adds
@@ -87,12 +84,14 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, f
 	if e.Action != github.GenericCommentActionCreated {
 		return nil
 	}
-	needsLabel := false
-	if labelCancelRe.MatchString(e.Body) {
+
+	var needsLabel bool
+	switch {
+	case labelCancelRe.MatchString(e.Body):
 		needsLabel = false
-	} else if labelRe.MatchString(e.Body) {
+	case labelRe.MatchString(e.Body):
 		needsLabel = true
-	} else {
+	default:
 		return nil
 	}
 

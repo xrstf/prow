@@ -157,7 +157,7 @@ test/e2e/e2e.go:137 BeforeSuite on Node 1 failed test/e2e/e2e.go:137
 			Content:    []byte("this log exists in gcs!"),
 		},
 	})
-	defer fakeGCSServer.Stop()
+
 	kc := fkc{
 		prowapi.ProwJob{
 			Spec: prowapi.ProwJobSpec{
@@ -220,7 +220,11 @@ test/e2e/e2e.go:137 BeforeSuite on Node 1 failed test/e2e/e2e.go:137
 	}
 	fakeJa = jobs.NewJobAgent(context.Background(), kc, false, true, []string{}, map[string]jobs.PodLogClient{kube.DefaultClusterAlias: fpkc("clusterA"), "trusted": fpkc("clusterB")}, fca{}.Config)
 	fakeJa.Start()
-	os.Exit(m.Run())
+
+	code := m.Run()
+	fakeGCSServer.Stop()
+
+	os.Exit(code)
 }
 
 type dumpLens struct{}
@@ -1511,7 +1515,7 @@ func TestResolveSymlink(t *testing.T) {
 				},
 			},
 		}
-		//fakeConfigAgent.Config().Deck.Spyglass.BucketAliases = map[string]string{"alias": "test-bucket"}
+		// fakeConfigAgent.Config().Deck.Spyglass.BucketAliases = map[string]string{"alias": "test-bucket"}
 		fakeJa = jobs.NewJobAgent(context.Background(), fkc{}, false, true, []string{}, map[string]jobs.PodLogClient{kube.DefaultClusterAlias: fpkc("clusterA"), "trusted": fpkc("clusterB")}, fakeConfigAgent.Config)
 		fakeJa.Start()
 

@@ -1994,7 +1994,8 @@ func mergeJobConfigs(a, b JobConfig) (JobConfig, error) {
 	// Merge everything.
 	// *** Presets ***
 	c := JobConfig{}
-	c.Presets = append(a.Presets, b.Presets...)
+	c.Presets = append([]Preset{}, a.Presets...)
+	c.Presets = append(c.Presets, b.Presets...)
 
 	// validate no duplicated preset key-value pairs.
 	validLabels := map[string]bool{}
@@ -2009,7 +2010,8 @@ func mergeJobConfigs(a, b JobConfig) (JobConfig, error) {
 	}
 
 	// *** Periodics ***
-	c.Periodics = append(a.Periodics, b.Periodics...)
+	c.Periodics = append([]Periodic{}, a.Periodics...)
+	c.Periodics = append(c.Periodics, b.Periodics...)
 
 	// *** Presubmits ***
 	c.PresubmitsStatic = make(map[string][]Presubmit)
@@ -2519,13 +2521,13 @@ func parseProwConfig(c *Config) error {
 
 	// jenkins operator controller template functions.
 	// reference:
-	// 	- https://helm.sh/docs/chart_template_guide/function_list/#string-functions
+	//  - https://helm.sh/docs/chart_template_guide/function_list/#string-functions
 	//  - https://github.com/Masterminds/sprig
 	//
 	// We could use sprig.FuncMap() instead in feature.
 	jenkinsFuncMap := template.FuncMap{
 		"replace": func(old, new, src string) string {
-			return strings.Replace(src, old, new, -1)
+			return strings.ReplaceAll(src, old, new)
 		},
 	}
 
@@ -2592,7 +2594,8 @@ func parseProwConfig(c *Config) error {
 	// Parse and cache all our regexes upfront.
 	c.Deck.Spyglass.RegexCache = make(map[string]*regexp.Regexp)
 	for _, lens := range c.Deck.Spyglass.Lenses {
-		toCompile := append(lens.OptionalFiles, lens.RequiredFiles...)
+		toCompile := append([]string{}, lens.OptionalFiles...)
+		toCompile = append(toCompile, lens.RequiredFiles...)
 		for _, v := range toCompile {
 			if _, ok := c.Deck.Spyglass.RegexCache[v]; ok {
 				continue

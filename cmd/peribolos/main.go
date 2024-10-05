@@ -474,16 +474,17 @@ func configureOrgMembers(opt options, client orgClient, orgName string, orgConfi
 			role = github.RoleAdmin
 		}
 		om, err := client.UpdateOrgMembership(orgName, user, super)
-		if err != nil {
+		switch {
+		case err != nil:
 			logrus.WithError(err).Warnf("UpdateOrgMembership(%s, %s, %t) failed", orgName, user, super)
 			if github.IsNotFound(err) {
 				// this could be caused by someone removing their account
 				// or a typo in the configuration but should not crash the sync
 				err = nil
 			}
-		} else if om.State == github.StatePending {
+		case om.State == github.StatePending:
 			logrus.Infof("Invited %s to %s as a %s", user, orgName, role)
-		} else {
+		default:
 			logrus.Infof("Set %s as a %s of %s", user, role, orgName)
 		}
 		return err
@@ -1284,13 +1285,14 @@ func configureTeamMembers(client teamMembersClient, orgName string, gt github.Te
 			role = github.RoleMaintainer
 		}
 		tm, err := client.UpdateTeamMembershipBySlug(orgName, gt.Slug, user, super)
-		if err != nil {
+		switch {
+		case err != nil:
 			// Augment the error with the operation we attempted so that the error makes sense after return
 			err = fmt.Errorf("UpdateTeamMembership(%s(%s), %s, %t) failed: %w", gt.Slug, gt.Name, user, super, err)
 			logrus.Warn(err)
-		} else if tm.State == github.StatePending {
+		case tm.State == github.StatePending:
 			logrus.Infof("Invited %s to %s(%s) as a %s", user, gt.Slug, gt.Name, role)
-		} else {
+		default:
 			logrus.Infof("Set %s as a %s of %s(%s)", user, role, gt.Slug, gt.Name)
 		}
 		return err

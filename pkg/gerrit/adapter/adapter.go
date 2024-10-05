@@ -822,9 +822,9 @@ func (c *Controller) triggerJobs(logger logrus.FieldLogger, instance string, cha
 			logger.WithError(err).Error("Failed to generate link to job results on Deck.")
 		}
 		if link != "" && err == nil {
-			message = message + link
+			message += link
 		} else {
-			message = message + jobList
+			message += jobList
 		}
 		if err := c.gc.SetReview(instance, change.ID, change.CurrentRevision, message, nil); err != nil {
 			return err

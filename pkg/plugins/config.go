@@ -2212,11 +2212,12 @@ func (c *Configuration) HasConfigFor() (global bool, orgs sets.Set[string], repo
 		global = true
 	}
 	for key := range c.Label.RestrictedLabels {
-		if key == "*" {
+		switch {
+		case key == "*":
 			global = true
-		} else if strings.Contains(key, "/") {
+		case strings.Contains(key, "/"):
 			repos.Insert(key)
-		} else {
+		default:
 			orgs.Insert(key)
 		}
 	}

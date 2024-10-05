@@ -134,9 +134,9 @@ func handlePush(pc plugins.Agent, pe github.PushEvent) error {
 }
 
 func notifyOnSlackIfManualMerge(pc client, pe github.PushEvent) error {
-	//Fetch MergeWarning for the repo we received the merge event.
+	// Fetch MergeWarning for the repo we received the merge event.
 	if mw := getMergeWarning(pc.SlackConfig.MergeWarnings, config.OrgRepo{Org: pe.Repo.Owner.Login, Repo: pe.Repo.Name}); mw != nil {
-		//If the MergeWarning exemption list has the merge user then no need to send a message.
+		// If the MergeWarning exemption list has the merge user then no need to send a message.
 		if ok := isExempted(mw, pe); !ok {
 			var message string
 			switch {

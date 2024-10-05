@@ -216,20 +216,22 @@ func (ta *tideAgent) filter(orgRepoID string, curIDs sets.Set[string], needsHide
 	if orgRepoID != "" && orgRepoID != config.DefaultTenantID {
 		curIDs.Insert(orgRepoID)
 	}
-	if len(ta.tenantIDs) > 0 {
+
+	switch {
+	case len(ta.tenantIDs) > 0:
 		if ta.matchingIDs(sets.List(curIDs)) {
 			// Deck has tenantIDs and they match with the History
 			return true
 		}
-	} else if needsHide {
+	case needsHide:
 		if ta.showHidden || ta.hiddenOnly {
 			return true
 		}
-	} else if !ta.hiddenOnly && noTenantIDOrDefaultTenantID(sets.List(curIDs)) {
+	case !ta.hiddenOnly && noTenantIDOrDefaultTenantID(sets.List(curIDs)):
 		return true
 	}
-	return false
 
+	return false
 }
 
 func (ta *tideAgent) filterQueries(queries []config.TideQuery) []config.TideQuery {

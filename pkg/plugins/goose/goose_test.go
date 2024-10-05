@@ -239,11 +239,12 @@ Available variants:
 	for _, testcase := range testcases {
 		fakehonk := &realGaggle{url: ts.URL + testcase.path}
 		goose, err := fakehonk.readGoose()
-		if testcase.valid && err != nil {
+		switch {
+		case testcase.valid && err != nil:
 			t.Errorf("For case %s, didn't expect error: %v", testcase.name, err)
-		} else if !testcase.valid && err == nil {
+		case !testcase.valid && err == nil:
 			t.Errorf("For case %s, expected error, received goose: %s", testcase.name, goose)
-		} else if testcase.valid && goose == "" {
+		case testcase.valid && goose == "":
 			t.Errorf("For case %s, got an empty goose", testcase.name)
 		}
 	}
@@ -258,17 +259,14 @@ Available variants:
 		IssueState: "open",
 	}
 	if err := handle(fc, logrus.WithField("plugin", pluginName), e, &realGaggle{url: ts.URL + "/?format=json"}, func() {}); err != nil {
-		t.Errorf("didn't expect error: %v", err)
-		return
+		t.Fatalf("didn't expect error: %v", err)
 	}
 	if len(fc.IssueComments[5]) != 1 {
-		t.Error("should have commented.")
-		return
+		t.Fatal("should have commented.")
 	}
 	if c := fc.IssueComments[5][0]; !strings.Contains(c.Body, img) {
 		t.Errorf("missing image url: %s from comment: %v", img, c)
 	}
-
 }
 
 // Small, unit tests
@@ -334,9 +332,10 @@ func TestGeese(t *testing.T) {
 			t.Errorf("%s: expected an error to occur", tc.name)
 			continue
 		}
-		if tc.shouldComment && len(fc.IssueComments[5]) != 1 {
+		switch {
+		case tc.shouldComment && len(fc.IssueComments[5]) != 1:
 			t.Errorf("%s: should have commented.", tc.name)
-		} else if tc.shouldComment {
+		case tc.shouldComment:
 			shouldImage := !tc.shouldError
 			body := fc.IssueComments[5][0].Body
 			hasImage := strings.Contains(body, "![")
@@ -345,7 +344,7 @@ func TestGeese(t *testing.T) {
 			} else if !hasImage && shouldImage {
 				t.Errorf("%s: no image in %s", tc.name, body)
 			}
-		} else if !tc.shouldComment && len(fc.IssueComments[5]) != 0 {
+		case !tc.shouldComment && len(fc.IssueComments[5]) != 0:
 			t.Errorf("%s: should not have commented.", tc.name)
 		}
 	}

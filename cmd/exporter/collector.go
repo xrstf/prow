@@ -43,7 +43,7 @@ type prowJobCollector struct {
 }
 
 func (pjc prowJobCollector) Describe(ch chan<- *prometheus.Desc) {
-	//prometheus.DescribeByCollect(pjc, ch)
+	// prometheus.DescribeByCollect(pjc, ch)
 	// Normally, we'd send descriptors into the channel. However, we cannot do so for these
 	// metrics as their label sets are dynamic. This is a take-our-own-risk action and also a
 	// compromise for implementing a metric with both dynamic keys and dynamic values in
@@ -58,8 +58,8 @@ func (pjc prowJobCollector) Collect(ch chan<- prometheus.Metric) {
 		logrus.WithError(err).Error("Failed to list prow jobs")
 		return
 	}
-	//We need to filter out the latest jobs
-	//because sending the same sample twice would lead to prometheus runtime error
+	// We need to filter out the latest jobs
+	// because sending the same sample twice would lead to prometheus runtime error
 	for _, pj := range getLatest(prowJobs) {
 		agent := string(pj.Spec.Agent)
 		pjLabelKeys, pjLabelValues := kubeLabelsToPrometheusLabels(filterWithDenylist(pj.Labels), "label_")

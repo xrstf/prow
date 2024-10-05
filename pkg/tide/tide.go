@@ -1058,11 +1058,12 @@ func (c *syncController) accumulate(presubmits map[int][]config.Presubmit, prs [
 			overallState = failureState
 		}
 
-		if overallState == successState {
+		switch overallState {
+		case successState:
 			successes = append(successes, pr)
-		} else if overallState == pendingState {
+		case pendingState:
 			pendings = append(pendings, pr)
-		} else {
+		default:
 			missings = append(missings, pr)
 		}
 	}

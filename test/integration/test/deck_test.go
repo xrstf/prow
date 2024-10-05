@@ -273,7 +273,7 @@ func TestDeckTenantIDs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			//Give them new names to prevent conflict
+			// Give them new names to prevent conflict
 			name := RandomString(t)
 			prowjobs := renamePJs(tt.prowjobs, name)
 			expected := renamePJs(tt.expected, name)

@@ -96,13 +96,13 @@ func needsComment(c config.Tide, pe github.PullRequestEvent) (bool, string) {
 
 	switch {
 	case method == types.MergeSquash && c.MergeLabel != "":
-		comment = fmt.Sprintf("%sYou can request commits to be merged using the label: %s", comment, c.MergeLabel)
+		comment += fmt.Sprintf("You can request commits to be merged using the label: %s", c.MergeLabel)
 	case method == types.MergeSquash && c.MergeLabel == "":
-		comment = comment + "Commits will be squashed, as no merge labels are defined"
+		comment += "Commits will be squashed, as no merge labels are defined"
 	case method == types.MergeMerge && c.SquashLabel != "":
-		comment = fmt.Sprintf("%sYou can request commits to be squashed using the label: %s", comment, c.SquashLabel)
+		comment += fmt.Sprintf("You can request commits to be squashed using the label: %s", c.SquashLabel)
 	case method == types.MergeMerge && c.SquashLabel == "":
-		comment = comment + "Commits will be merged, as no squash labels are defined"
+		comment += "Commits will be merged, as no squash labels are defined"
 	}
 
 	return true, comment

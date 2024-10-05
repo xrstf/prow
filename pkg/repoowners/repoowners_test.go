@@ -903,10 +903,9 @@ func testLoadRepoOwners(clients localgit.Clients, t *testing.T) {
 					t.Fatalf("expected cache must be reused, but got baseDir %q", ro.baseDir)
 				}
 				return
-			} else {
-				if ro.baseDir == "cache" {
-					t.Fatal("expected cache should not be reused, but reused")
-				}
+			}
+			if ro.baseDir == "cache" {
+				t.Fatal("expected cache should not be reused, but reused")
 			}
 			if ro.baseDir == "" {
 				t.Fatal("Expected 'baseDir' to be populated.")

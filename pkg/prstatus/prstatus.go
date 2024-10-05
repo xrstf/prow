@@ -356,11 +356,12 @@ func (da *DashboardAgent) getHeadContexts(ghc githubStatusFetcher, pr PullReques
 	}
 	for _, checkrun := range checkruns.CheckRuns {
 		var state string
-		if checkrun.CompletedAt == "" {
+		switch {
+		case checkrun.CompletedAt == "":
 			state = "PENDING"
-		} else if strings.ToUpper(checkrun.Conclusion) == "NEUTRAL" {
+		case strings.ToUpper(checkrun.Conclusion) == "NEUTRAL":
 			state = "SUCCESS"
-		} else {
+		default:
 			state = strings.ToUpper(checkrun.Conclusion)
 		}
 		contexts = append(contexts, Context{

@@ -98,11 +98,12 @@ func parseLogins(text string) []string {
 }
 
 func combineErrors(err1, err2 error) error {
-	if err1 != nil && err2 != nil {
+	switch {
+	case err1 != nil && err2 != nil:
 		return fmt.Errorf("two errors: 1) %s 2) %w", err1.Error(), err2)
-	} else if err1 != nil {
+	case err1 != nil:
 		return err1
-	} else {
+	default:
 		return err2
 	}
 }

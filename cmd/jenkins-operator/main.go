@@ -82,13 +82,13 @@ func (o *options) Validate() error {
 
 	var transportSecretsProvided int
 	if o.certFile == "" {
-		transportSecretsProvided = transportSecretsProvided + 1
+		transportSecretsProvided++
 	}
 	if o.keyFile == "" {
-		transportSecretsProvided = transportSecretsProvided + 1
+		transportSecretsProvided++
 	}
 	if o.caCertFile == "" {
-		transportSecretsProvided = transportSecretsProvided + 1
+		transportSecretsProvided++
 	}
 	if transportSecretsProvided != 0 && transportSecretsProvided != 3 {
 		return errors.New("either --cert-file, --key-file, and --ca-cert-file must all be provided or none of them must be provided")

@@ -167,7 +167,7 @@ func (c *fakeClient) CreateStatus(org, repo, ref string, s github.Status) error 
 			return nil
 		}
 	}
-	//handle branch protection case
+	// handle branch protection case
 	if len(c.statuses) == 0 {
 		c.statuses = append(c.statuses, s)
 	}
@@ -219,13 +219,14 @@ func (c *fakeClient) ListCheckRuns(org, repo, ref string) (*github.CheckRunList,
 
 func (c *fakeClient) CreateCheckRun(org, repo string, checkRun github.CheckRun) (int64, error) {
 	for _, checkrun := range c.checkruns.CheckRuns {
-		if checkrun.CompletedAt == "" {
+		switch {
+		case checkrun.CompletedAt == "":
 			continue
-		} else if strings.ToUpper(checkrun.Conclusion) == "NEUTRAL" {
+		case strings.ToUpper(checkrun.Conclusion) == "NEUTRAL":
 			continue
-		} else if strings.ToUpper(checkrun.Conclusion) == "SUCCESS" {
+		case strings.ToUpper(checkrun.Conclusion) == "SUCCESS":
 			continue
-		} else if checkrun.Name == checkRun.Name {
+		case checkrun.Name == checkRun.Name:
 			prowOverrideCR := github.CheckRun{
 				Name:        checkrun.Name,
 				HeadSHA:     checkrun.HeadSHA,

@@ -17,7 +17,6 @@ limitations under the License.
 package simplifypath
 
 import (
-	"strings"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/util/diff"
@@ -35,7 +34,7 @@ func TestLiteral(t *testing.T) {
 
 func TestEmptyLiteral(t *testing.T) {
 	l := L("", Node{})
-	if !l.Matches(strings.Split("/", "/")[0]) {
+	if !l.Matches("") {
 		t.Errorf("expected empty literal to match root, but didn't")
 	}
 	if actual, expected := l.Represent(), ""; actual != expected {

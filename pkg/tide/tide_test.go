@@ -1333,23 +1333,21 @@ func TestMergeMethodCheckerAndPRMergeMethod(t *testing.T) {
 				}
 				return
 			} else if tc.expectErr {
-				t.Errorf("missing expected error")
-				return
+				t.Fatal("missing expected error")
 			}
 			if tc.expectedMethod != *actual {
 				t.Errorf("wanted: %q, got: %q", tc.expectedMethod, *actual)
 			}
 			reason, err := mmc.isAllowedToMerge(CodeReviewCommonFromPullRequest(pr))
-			if err != nil {
+			switch {
+			case err != nil:
 				t.Errorf("unexpected processing error: %v", err)
-			} else if reason != "" {
+			case reason != "":
 				if !tc.expectConflictErr {
 					t.Errorf("unexpected merge method conflict error: %v", err)
 				}
-				return
-			} else if tc.expectConflictErr {
-				t.Errorf("missing expected merge method conflict error")
-				return
+			case tc.expectConflictErr:
+				t.Error("missing expected merge method conflict error")
 			}
 		})
 	}
@@ -1417,11 +1415,10 @@ func TestRebaseMergeMethodIsAllowed(t *testing.T) {
 
 			mergeOutput, err := mmc.isAllowedToMerge(CodeReviewCommonFromPullRequest(pr))
 			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			} else {
-				if mergeOutput != tc.expectedMergeOutput {
-					t.Errorf("Expected merge output \"%s\" but got \"%s\"\n", tc.expectedMergeOutput, mergeOutput)
-				}
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if mergeOutput != tc.expectedMergeOutput {
+				t.Errorf("Expected merge output \"%s\" but got \"%s\"\n", tc.expectedMergeOutput, mergeOutput)
 			}
 		})
 	}

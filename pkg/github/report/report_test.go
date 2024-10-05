@@ -252,10 +252,10 @@ func (gh *fakeGhClient) CreateCommentWithContext(_ context.Context, org, repo st
 	gh.comments = append(gh.comments, comment)
 	return nil
 }
-func (gh fakeGhClient) DeleteCommentWithContext(_ context.Context, org, repo string, ID int) error {
+func (gh fakeGhClient) DeleteCommentWithContext(_ context.Context, org, repo string, id int) error {
 	return nil
 }
-func (gh fakeGhClient) EditCommentWithContext(_ context.Context, org, repo string, ID int, comment string) error {
+func (gh fakeGhClient) EditCommentWithContext(_ context.Context, org, repo string, id int, comment string) error {
 	return nil
 }
 

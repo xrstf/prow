@@ -71,41 +71,44 @@ func TestShrugComment(t *testing.T) {
 		},
 	}
 	for _, tc := range testcases {
-		fc := fakegithub.NewFakeClient()
-		e := &github.GenericCommentEvent{
-			Action: github.GenericCommentActionCreated,
-			Body:   tc.body,
-			Number: 5,
-			Repo:   github.Repo{Owner: github.User{Login: "org"}, Name: "repo"},
-		}
-		if tc.hasShrug {
-			fc.IssueLabelsAdded = []string{"org/repo#5:" + labels.Shrug}
-		}
-		if err := handle(fc, logrus.WithField("plugin", pluginName), e); err != nil {
-			t.Errorf("For case %s, didn't expect error: %v", tc.name, err)
-			continue
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			fc := fakegithub.NewFakeClient()
+			e := &github.GenericCommentEvent{
+				Action: github.GenericCommentActionCreated,
+				Body:   tc.body,
+				Number: 5,
+				Repo:   github.Repo{Owner: github.User{Login: "org"}, Name: "repo"},
+			}
+			if tc.hasShrug {
+				fc.IssueLabelsAdded = []string{"org/repo#5:" + labels.Shrug}
+			}
+			if err := handle(fc, logrus.WithField("plugin", pluginName), e); err != nil {
+				t.Fatalf("didn't expect error: %v", err)
+			}
 
-		hadShrug := 0
-		if tc.hasShrug {
-			hadShrug = 1
-		}
-		if tc.shouldShrug {
-			if len(fc.IssueLabelsAdded)-hadShrug != 1 {
-				t.Errorf("For case %s, should add shrug.", tc.name)
+			hadShrug := 0
+			if tc.hasShrug {
+				hadShrug = 1
 			}
-			if len(fc.IssueLabelsRemoved) != 0 {
-				t.Errorf("For case %s, should not remove label.", tc.name)
+
+			switch {
+			case tc.shouldShrug:
+				if len(fc.IssueLabelsAdded)-hadShrug != 1 {
+					t.Error("should add shrug.")
+				}
+				if len(fc.IssueLabelsRemoved) != 0 {
+					t.Error("should not remove label.")
+				}
+			case tc.shouldUnshrug:
+				if len(fc.IssueLabelsAdded)-hadShrug != 0 {
+					t.Error("should not add shrug.")
+				}
+				if len(fc.IssueLabelsRemoved) != 1 {
+					t.Error("should remove shrug.")
+				}
+			case len(fc.IssueLabelsAdded)-hadShrug > 0 || len(fc.IssueLabelsRemoved) > 0:
+				t.Error("should not have added/removed shrug.")
 			}
-		} else if tc.shouldUnshrug {
-			if len(fc.IssueLabelsAdded)-hadShrug != 0 {
-				t.Errorf("For case %s, should not add shrug.", tc.name)
-			}
-			if len(fc.IssueLabelsRemoved) != 1 {
-				t.Errorf("For case %s, should remove shrug.", tc.name)
-			}
-		} else if len(fc.IssueLabelsAdded)-hadShrug > 0 || len(fc.IssueLabelsRemoved) > 0 {
-			t.Errorf("For case %s, should not have added/removed shrug.", tc.name)
-		}
+		})
 	}
 }

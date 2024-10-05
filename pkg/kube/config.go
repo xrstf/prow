@@ -54,11 +54,12 @@ func mergeConfigs(local *rest.Config, foreign map[string]rest.Config, currentCon
 	for ctx, cfg := range foreign {
 		ret[ctx] = cfg
 	}
-	if local != nil {
+	switch {
+	case local != nil:
 		ret[InClusterContext] = *local
-	} else if currentContext != "" {
+	case currentContext != "":
 		ret[InClusterContext] = ret[currentContext]
-	} else {
+	default:
 		return nil, errors.New("no prow cluster access: in-cluster current kubecfg context required")
 	}
 	if len(ret) == 0 {

@@ -65,13 +65,14 @@ func compareDiffs(diffs []github.Status, expectedDiffs []github.Status) error {
 			return fmt.Errorf("failed because the returned diff for context '%s' had State '%s' instead of '%s'", diff.Context, diff.State, match.State)
 		}
 
-		if match.TargetURL == "" {
+		switch {
+		case match.TargetURL == "":
 			if diff.TargetURL != "" {
 				return fmt.Errorf("failed because the returned diff for context '%s' had a non-empty TargetURL", diff.Context)
 			}
-		} else if diff.TargetURL == "" {
+		case diff.TargetURL == "":
 			return fmt.Errorf("failed because the returned diff for context '%s' had an empty TargetURL", diff.Context)
-		} else if match.TargetURL != diff.TargetURL {
+		case match.TargetURL != diff.TargetURL:
 			return fmt.Errorf("failed because the returned diff for context '%s' had TargetURL '%s' instead of '%s'", diff.Context, diff.TargetURL, match.TargetURL)
 		}
 	}
@@ -385,7 +386,7 @@ func (c *fakeGitHubClient) GetCombinedStatus(org, repo, ref string) (*github.Com
 	return nil, errors.New("return error to stop execution early")
 }
 
-func (c *fakeGitHubClient) CreateStatus(org, repo, SHA string, s github.Status) error {
+func (c *fakeGitHubClient) CreateStatus(org, repo, sha string, s github.Status) error {
 	return nil
 }
 

@@ -43,17 +43,6 @@ func (c fakeHerd) readPony(tags string) (string, error) {
 	return string(c), nil
 }
 
-func parsePoniesFromComment(comment []github.IssueComment) (ponies int) {
-	if comment == nil {
-		return
-	}
-	// Golang doesn't support lookback regex matches. Hence this hack to parse the pony URLs from rest of the comment.
-	var rawComment = comment[0].Body
-	rawComment = rawComment[strings.Index(rawComment, ":")+1:]
-	rawComment = strings.TrimSpace(rawComment[:strings.Index(rawComment, "<details>")])
-	return len(strings.Split(rawComment, "\n"))
-}
-
 func TestRealPony(t *testing.T) {
 	if !*human {
 		t.Skip("Real ponies disabled for automation. Manual users can add --human [--category=foo]")
@@ -224,7 +213,7 @@ func TestHttpResponse(t *testing.T) {
 			Number:     5,
 			IssueState: "open",
 		}
-		err = handle(fc, logrus.WithField("plugin", pluginName), e, realHerd(ts.URL+testcase.path))
+		_, err = handle(fc, logrus.WithField("plugin", pluginName), e, realHerd(ts.URL+testcase.path))
 		if err != nil {
 			t.Errorf("tc %s: For comment %s, didn't expect error: %v", testcase.name, testcase.comment, err)
 		}
@@ -329,14 +318,13 @@ func TestPonies(t *testing.T) {
 			IssueState: tc.state,
 			IsPR:       tc.pr,
 		}
-		err := handle(fc, logrus.WithField("plugin", pluginName), e, fakeHerd("pone"))
-		if err != nil {
-			t.Errorf("For case %s, didn't expect error: %v", tc.name, err)
-		}
 
-		var actualPonyCount = parsePoniesFromComment(fc.IssueComments[5])
-		if tc.numPonies != actualPonyCount {
-			t.Errorf("For case '%s', #expected ponies %v, #found ponies %v", tc.name, tc.numPonies, actualPonyCount)
+		ponies, err := handle(fc, logrus.WithField("plugin", pluginName), e, fakeHerd("pone"))
+		if err != nil {
+			t.Fatalf("For case %s, didn't expect error: %v", tc.name, err)
+		}
+		if ponies != tc.numPonies {
+			t.Fatalf("Expected to detect %d ponies, but got %d.\n", tc.numPonies, ponies)
 		}
 	}
 }

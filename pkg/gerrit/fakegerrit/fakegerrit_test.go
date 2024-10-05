@@ -38,10 +38,8 @@ func TestAddChange(t *testing.T) {
 
 			if project, ok := fg.Projects["testproject"]; !ok {
 				t.Fatalf("project %s not properly added to fake gerrit client", "testproject")
-			} else {
-				if len(project.ChangeIDs) == 0 {
-					t.Fatalf("change not properly added to project")
-				}
+			} else if len(project.ChangeIDs) == 0 {
+				t.Fatalf("change not properly added to project")
 			}
 		})
 	}

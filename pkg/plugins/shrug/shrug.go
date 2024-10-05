@@ -71,12 +71,13 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent) e
 		return nil
 	}
 
-	wantShrug := false
-	if shrugRe.MatchString(e.Body) {
+	var wantShrug bool
+	switch {
+	case shrugRe.MatchString(e.Body):
 		wantShrug = true
-	} else if unshrugRe.MatchString(e.Body) {
+	case unshrugRe.MatchString(e.Body):
 		wantShrug = false
-	} else {
+	default:
 		return nil
 	}
 

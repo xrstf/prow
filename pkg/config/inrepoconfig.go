@@ -204,9 +204,12 @@ func ReadProwYAML(log *logrus.Entry, dir string, strict bool) (*ProwYAML, error)
 	if fileInfo, err := os.Stat(prowYAMLDirPath); !os.IsNotExist(err) && err == nil && fileInfo.IsDir() {
 		mergeProwYAML := func(a, b *ProwYAML) *ProwYAML {
 			c := &ProwYAML{}
-			c.Presets = append(a.Presets, b.Presets...)
-			c.Presubmits = append(a.Presubmits, b.Presubmits...)
-			c.Postsubmits = append(a.Postsubmits, b.Postsubmits...)
+			c.Presets = append(c.Presets, a.Presets...)
+			c.Presets = append(c.Presets, b.Presets...)
+			c.Presubmits = append(c.Presubmits, a.Presubmits...)
+			c.Presubmits = append(c.Presubmits, b.Presubmits...)
+			c.Postsubmits = append(c.Postsubmits, a.Postsubmits...)
+			c.Postsubmits = append(c.Postsubmits, b.Postsubmits...)
 
 			return c
 		}
@@ -254,10 +257,8 @@ func ReadProwYAML(log *logrus.Entry, dir string, strict bool) (*ProwYAML, error)
 			if err := yaml.Unmarshal(bytes, prowYAML, opts...); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal %q: %w", prowYAMLDirPath, err)
 			}
-		} else {
-			if !os.IsNotExist(err) {
-				return nil, fmt.Errorf("failed to check if file %q exists: %w", prowYAMLDirPath, err)
-			}
+		} else if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("failed to check if file %q exists: %w", prowYAMLDirPath, err)
 		}
 	}
 	return prowYAML, nil

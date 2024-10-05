@@ -62,9 +62,7 @@ type commentPruner interface {
 
 func init() {
 	plugins.RegisterGenericCommentHandler(PluginName, handleGenericCommentEvent, helpProvider)
-	plugins.RegisterPullRequestHandler(PluginName, func(pc plugins.Agent, pe github.PullRequestEvent) error {
-		return handlePullRequestEvent(pc, pe)
-	}, helpProvider)
+	plugins.RegisterPullRequestHandler(PluginName, handlePullRequestEvent, helpProvider)
 	plugins.RegisterReviewEventHandler(PluginName, handlePullRequestReviewEvent, helpProvider)
 }
 
@@ -195,12 +193,13 @@ func handleGenericComment(gc githubClient, config *plugins.Configuration, owners
 
 	// If we create an "/lgtm" comment, add lgtm if necessary.
 	// If we create a "/lgtm cancel" comment, remove lgtm if necessary.
-	wantLGTM := false
-	if LGTMRe.MatchString(rc.body) {
+	var wantLGTM bool
+	switch {
+	case LGTMRe.MatchString(rc.body):
 		wantLGTM = true
-	} else if LGTMCancelRe.MatchString(rc.body) {
+	case LGTMCancelRe.MatchString(rc.body):
 		wantLGTM = false
-	} else {
+	default:
 		return nil
 	}
 
@@ -237,12 +236,13 @@ func handlePullRequestReview(gc githubClient, config *plugins.Configuration, own
 
 	// If we review with Approve, add lgtm if necessary.
 	// If we review with Request Changes, remove lgtm if necessary.
-	wantLGTM := false
-	if reviewState == github.ReviewStateApproved {
+	var wantLGTM bool
+	switch reviewState {
+	case github.ReviewStateApproved:
 		wantLGTM = true
-	} else if reviewState == github.ReviewStateChangesRequested {
+	case github.ReviewStateChangesRequested:
 		wantLGTM = false
-	} else {
+	default:
 		return nil
 	}
 

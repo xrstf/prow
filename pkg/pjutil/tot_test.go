@@ -35,7 +35,7 @@ func (r *responseVendor) next() (int, string) {
 	code := r.codes[r.position]
 	datum := r.data[r.position]
 
-	r.position = r.position + 1
+	r.position++
 	if r.position == len(r.codes) {
 		r.position = 0
 	}
@@ -95,11 +95,12 @@ func TestGetBuildID(t *testing.T) {
 		totServ := parrotServer(testCase.codes, testCase.data)
 
 		actual, actualErr := GetBuildID("dummy", totServ.URL)
-		if testCase.expectedErr && actualErr == nil {
+		switch {
+		case testCase.expectedErr && actualErr == nil:
 			t.Errorf("%s: expected an error but got none", testCase.name)
-		} else if !testCase.expectedErr && actualErr != nil {
+		case !testCase.expectedErr && actualErr != nil:
 			t.Errorf("%s: expected no error but got one: %v", testCase.name, actualErr)
-		} else if !testCase.expectedErr && actual != testCase.expected {
+		case !testCase.expectedErr && actual != testCase.expected:
 			t.Errorf("%s: expected response %v but got: %v", testCase.name, testCase.expected, actual)
 		}
 

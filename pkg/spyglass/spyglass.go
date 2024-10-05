@@ -361,9 +361,10 @@ func (sg *Spyglass) RunToPR(src string) (string, string, int, error) {
 		// in unintended ways to infer the original PR. Aside from this being some work to do, it's also slow: we would
 		// like to be able to always answer this request without needing to call out to GCS.
 		logType := split[1]
-		if logType == gcs.NonPRLogs {
+		switch logType {
+		case gcs.NonPRLogs:
 			return "", "", 0, fmt.Errorf("not a PR URL: %q", key)
-		} else if logType == gcs.PRLogs {
+		case gcs.PRLogs:
 			if len(split) < 3 {
 				return "", "", 0, fmt.Errorf("malformed %s key %q should have at least three components", gcs.PRLogs, key)
 			}
@@ -400,7 +401,7 @@ func (sg *Spyglass) RunToPR(src string) (string, string, int, error) {
 			default:
 				return "", "", 0, fmt.Errorf("didn't understand the GCS URL %q", key)
 			}
-		} else {
+		default:
 			return "", "", 0, fmt.Errorf("unknown log type: %q", logType)
 		}
 	}

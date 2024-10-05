@@ -433,11 +433,12 @@ func upstreamConfigVersions(upstreamVersionType string, o *options, parse func(u
 	versions = make(map[string]string)
 	var upstreamAddress string
 	for _, prefix := range o.Prefixes {
-		if upstreamVersionType == upstreamVersion {
+		switch upstreamVersionType {
+		case upstreamVersion:
 			upstreamAddress = o.UpstreamURLBase + "/" + prefix.RefConfigFile
-		} else if upstreamVersionType == upstreamStagingVersion {
+		case upstreamStagingVersion:
 			upstreamAddress = o.UpstreamURLBase + "/" + prefix.StagingRefConfigFile
-		} else {
+		default:
 			return nil, fmt.Errorf("unsupported upstream version type: %s, must be one of %v",
 				upstreamVersionType, []string{upstreamVersion, upstreamStagingVersion})
 		}
@@ -498,11 +499,10 @@ func getVersionsAndCheckConsistency(prefixes []prefix, images map[string]string)
 					}
 				}
 
-				//Only add bumped images to the new versions map
+				// Only add bumped images to the new versions map
 				if !strings.Contains(k, v) {
 					versions[v] = append(versions[v], k)
 				}
-
 			}
 		}
 	}

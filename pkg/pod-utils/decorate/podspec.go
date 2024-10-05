@@ -222,8 +222,8 @@ func ProwJobToPodLocal(pj prowapi.ProwJob, outputDir string) (*coreapi.Pod, erro
 	}
 
 	if pj.Spec.DecorationConfig == nil {
-		for i, container := range spec.Containers {
-			spec.Containers[i].Env = append(container.Env, KubeEnv(rawEnv)...)
+		for i := range spec.Containers {
+			spec.Containers[i].Env = append(spec.Containers[i].Env, KubeEnv(rawEnv)...)
 		}
 	} else {
 		if err := decorate(spec, &pj, rawEnv, outputDir); err != nil {
@@ -754,8 +754,8 @@ func decorate(spec *coreapi.PodSpec, pj *prowapi.ProwJob, rawEnv map[string]stri
 		*initUpload,
 		PlaceEntrypoint(pj.Spec.DecorationConfig, toolsMount),
 	)
-	for i, container := range spec.Containers {
-		spec.Containers[i].Env = append(container.Env, KubeEnv(rawEnv)...)
+	for i := range spec.Containers {
+		spec.Containers[i].Env = append(spec.Containers[i].Env, KubeEnv(rawEnv)...)
 	}
 
 	secretVolumes := sets.New[string]()
@@ -811,8 +811,10 @@ func decorate(spec *coreapi.PodSpec, pj *prowapi.ProwJob, rawEnv map[string]stri
 
 	if len(refs) > 0 {
 		for i, container := range spec.Containers {
-			spec.Containers[i].WorkingDir = DetermineWorkDir(codeMount.MountPath, refs)
-			spec.Containers[i].VolumeMounts = append(container.VolumeMounts, codeMount)
+			container.WorkingDir = DetermineWorkDir(codeMount.MountPath, refs)
+			container.VolumeMounts = append(container.VolumeMounts, codeMount)
+
+			spec.Containers[i] = container
 		}
 		spec.Volumes = append(spec.Volumes, append(cloneVolumes, codeVolume)...)
 	}

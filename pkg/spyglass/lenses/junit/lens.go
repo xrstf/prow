@@ -223,9 +223,10 @@ func (lens Lens) getJvd(artifacts []api.Artifact) JVD {
 			)
 			for _, test := range tests {
 				// skipped test has no reason to rerun, so no deduplication
-				if test.Status() == skippedStatus {
+				switch {
+				case test.Status() == skippedStatus:
 					skipped = true
-				} else if test.Status() == failedStatus {
+				case test.Status() == failedStatus:
 					if passed {
 						passed = false
 						failed = false
@@ -234,16 +235,17 @@ func (lens Lens) getJvd(artifacts []api.Artifact) JVD {
 					if !flaky {
 						failed = true
 					}
-				} else if failed { // Test succeeded but marked failed previously
+				case failed: // Test succeeded but marked failed previously
 					passed = false
 					failed = false
 					flaky = true
-				} else if !flaky { // Test succeeded and not marked as flaky
+				case !flaky: // Test succeeded and not marked as flaky
 					passed = true
 				}
 			}
 
-			if skipped {
+			switch {
+			case skipped:
 				jvd.Skipped = append(jvd.Skipped, TestResult{
 					Junit: tests,
 					Link:  result.link,
@@ -258,17 +260,17 @@ func (lens Lens) getJvd(artifacts []api.Artifact) JVD {
 					// account for the duplication
 					duplicates++
 				}
-			} else if failed {
+			case failed:
 				jvd.Failed = append(jvd.Failed, TestResult{
 					Junit: tests,
 					Link:  result.link,
 				})
-			} else if flaky {
+			case flaky:
 				jvd.Flaky = append(jvd.Flaky, TestResult{
 					Junit: tests,
 					Link:  result.link,
 				})
-			} else {
+			default:
 				jvd.Passed = append(jvd.Passed, TestResult{
 					Junit: tests,
 					Link:  result.link,

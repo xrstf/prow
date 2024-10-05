@@ -128,7 +128,7 @@ func extractDocumentDetails(name string, id int, content []byte) document {
 			doc.Content = strings.ReplaceAll(doc.Content, `"`, `&quot;`)
 
 			if description != "" {
-				doc.Title = doc.Title + fmt.Sprintf(` <abbr class="icon material-icons" title="%s">info</abbr>`, description)
+				doc.Title += fmt.Sprintf(` <abbr class="icon material-icons" title="%s">info</abbr>`, description)
 			}
 
 			return doc

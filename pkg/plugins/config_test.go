@@ -2203,11 +2203,12 @@ func TestHasConfigFor(t *testing.T) {
 				expectOrgs, expectRepos = sets.Set[string]{}, sets.Set[string]{}
 
 				for orgOrRepo := range fuzzedConfig.Label.RestrictedLabels {
-					if orgOrRepo == "*" {
+					switch {
+					case orgOrRepo == "*":
 						expectGlobal = true
-					} else if strings.Contains(orgOrRepo, "/") {
+					case strings.Contains(orgOrRepo, "/"):
 						expectRepos.Insert(orgOrRepo)
-					} else {
+					default:
 						expectOrgs.Insert(orgOrRepo)
 					}
 				}

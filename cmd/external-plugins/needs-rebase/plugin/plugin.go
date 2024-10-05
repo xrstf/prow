@@ -435,6 +435,6 @@ func NewCache(validTime int) *Cache {
 	return &Cache{
 		cache:       make(map[int]time.Time),
 		validTime:   time.Second * time.Duration(validTime),
-		currentTime: func() time.Time { return time.Now() },
+		currentTime: time.Now,
 	}
 }

@@ -243,11 +243,12 @@ func parseIssueComments(pjs []prowapi.ProwJob, isBot func(string) bool, ics []gi
 		var tracking bool
 		for _, line := range strings.Split(ic.Body, "\n") {
 			line = strings.TrimSpace(line)
-			if strings.HasPrefix(line, "---") {
+			switch {
+			case strings.HasPrefix(line, "---"):
 				tracking = true
-			} else if len(line) == 0 {
+			case len(line) == 0:
 				tracking = false
-			} else if tracking {
+			case tracking:
 				entries = append(entries, line)
 			}
 		}

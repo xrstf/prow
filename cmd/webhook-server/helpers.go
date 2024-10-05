@@ -55,11 +55,11 @@ const (
 var genCertFunc = genCert
 
 func genCert(expiry int, dnsNames []string) (string, string, string, error) {
-	//https://gist.github.com/velotiotech/2e0cfd15043513d253cad7c9126d2026#file-initcontainer_main-go
+	// https://gist.github.com/velotiotech/2e0cfd15043513d253cad7c9126d2026#file-initcontainer_main-go
 	var caPEM, serverCertPEM, serverPrivKeyPEM *bytes.Buffer
 	// CA config
 	ca := &x509.Certificate{
-		SerialNumber: big.NewInt(2020), //unique identifier for cert
+		SerialNumber: big.NewInt(2020), // unique identifier for cert
 		Subject: pkix.Name{
 			Organization: []string{org},
 		},
@@ -96,14 +96,14 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 	// server cert config
 	cert := &x509.Certificate{
 		DNSNames:     dnsNames,
-		SerialNumber: big.NewInt(1658), //unique identifier for cert
+		SerialNumber: big.NewInt(1658), // unique identifier for cert
 		Subject: pkix.Name{
-			CommonName:   "admission-webhook-service.default.svc", //this field doesn't affect the server cert config
+			CommonName:   "admission-webhook-service.default.svc", // this field doesn't affect the server cert config
 			Organization: []string{org},
 		},
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().AddDate(expiry, 0, 0),
-		SubjectKeyId: []byte{1, 2, 3, 4, 6}, //unique identifier for cert
+		SubjectKeyId: []byte{1, 2, 3, 4, 6}, // unique identifier for cert
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 	}
@@ -120,7 +120,7 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 		return "", "", "", fmt.Errorf("error generating signed server certificate: %w", err)
 	}
 
-	// PEM encode the  server cert and key
+	// PEM encode the server cert and key
 	serverCertPEM = new(bytes.Buffer)
 	err = pem.Encode(serverCertPEM, &pem.Block{
 		Type:  "CERTIFICATE",
@@ -140,7 +140,6 @@ func genCert(expiry int, dnsNames []string) (string, string, string, error) {
 	}
 
 	return serverCertPEM.String(), serverPrivKeyPEM.String(), caPEM.String(), nil
-
 }
 
 func isCertValid(cert string) error {
@@ -303,8 +302,8 @@ func ensureMutatingWebhookConfig(ctx context.Context, caPem string, client ctrlr
 				Name: prowJobMutatingWebhookName,
 				ObjectSelector: &v1.LabelSelector{
 					MatchLabels: map[string]string{
-						"admission-webhook": "enabled", //for now till there is more confidence, ensures only prowjobs with this label are affected
-						"default-me":        "enabled", //for now till there is more confidence, ensures only prowjobs with this label are affected
+						"admission-webhook": "enabled", // for now till there is more confidence, ensures only prowjobs with this label are affected
+						"default-me":        "enabled", // for now till there is more confidence, ensures only prowjobs with this label are affected
 					},
 				},
 				Rules: []admregistration.RuleWithOperations{

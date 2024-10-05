@@ -332,16 +332,19 @@ func (p *protector) UpdateRepo(orgName string, repoName string, repo config.Repo
 			return fmt.Errorf("list branches: %w", err)
 		}
 		for _, b := range bs {
-			_, ok := repo.Branches[b.Name]
-			if !ok && branchInclusions != nil && branchInclusions.MatchString(b.Name) {
-				branches[b.Name] = b
-			} else if !ok && branchInclusions != nil && !branchInclusions.MatchString(b.Name) {
-				logrus.Infof("%s/%s=%s: not included", orgName, repoName, b.Name)
-				continue
-			} else if !ok && branchExclusions != nil && branchExclusions.MatchString(b.Name) {
-				logrus.Infof("%s/%s=%s: excluded", orgName, repoName, b.Name)
-				continue
+			if _, ok := repo.Branches[b.Name]; !ok {
+				switch {
+				case branchInclusions != nil && branchInclusions.MatchString(b.Name):
+					branches[b.Name] = b
+				case branchInclusions != nil && !branchInclusions.MatchString(b.Name):
+					logrus.Infof("%s/%s=%s: not included", orgName, repoName, b.Name)
+					continue
+				case branchExclusions != nil && branchExclusions.MatchString(b.Name):
+					logrus.Infof("%s/%s=%s: excluded", orgName, repoName, b.Name)
+					continue
+				}
 			}
+
 			branches[b.Name] = b
 		}
 	}

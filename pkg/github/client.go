@@ -141,17 +141,17 @@ type PullRequestClient interface {
 	RequestReview(org, repo string, number int, logins []string) error
 	UnrequestReview(org, repo string, number int, logins []string) error
 	Merge(org, repo string, pr int, details MergeDetails) error
-	IsMergeable(org, repo string, number int, SHA string) (bool, error)
+	IsMergeable(org, repo string, number int, sha string) (bool, error)
 	ListPullRequestCommits(org, repo string, number int) ([]RepositoryCommit, error)
 	UpdatePullRequestBranch(org, repo string, number int, expectedHeadSha *string) error
 }
 
 // CommitClient interface for commit related API actions
 type CommitClient interface {
-	CreateStatus(org, repo, SHA string, s Status) error
-	CreateStatusWithContext(ctx context.Context, org, repo, SHA string, s Status) error
+	CreateStatus(org, repo, sha string, s Status) error
+	CreateStatusWithContext(ctx context.Context, org, repo, sha string, s Status) error
 	ListStatuses(org, repo, ref string) ([]Status, error)
-	GetSingleCommit(org, repo, SHA string) (RepositoryCommit, error)
+	GetSingleCommit(org, repo, sha string) (RepositoryCommit, error)
 	GetCombinedStatus(org, repo, ref string) (*CombinedStatus, error)
 	ListCheckRuns(org, repo, ref string) (*CheckRunList, error)
 	GetRef(org, repo, ref string) (string, error)
@@ -940,13 +940,17 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 	var resp *http.Response
 	var err error
 	backoff := c.initialDelay
+loop:
 	for retries := 0; retries < c.maxRetries; retries++ {
 		if retries > 0 && resp != nil {
 			resp.Body.Close()
 		}
 		resp, err = c.doRequest(ctx, method, c.bases[hostIndex]+path, accept, org, body)
-		if err == nil {
-			if resp.StatusCode == 404 && retries < c.max404Retries {
+
+		switch {
+		case err == nil:
+			switch {
+			case resp.StatusCode == http.StatusNotFound && retries < c.max404Retries:
 				// Retry 404s a couple times. Sometimes GitHub is inconsistent in
 				// the sense that they send us an event such as "PR opened" but an
 				// immediate request to GET the PR returns 404. We don't want to
@@ -956,7 +960,8 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 				c.logger.WithField("backoff", backoff.String()).Debug("Retrying 404")
 				c.time.Sleep(backoff)
 				backoff *= 2
-			} else if resp.StatusCode == 403 {
+
+			case resp.StatusCode == http.StatusForbidden:
 				if resp.Header.Get("X-RateLimit-Remaining") == "0" {
 					// If we are out of API tokens, sleep first. The X-RateLimit-Reset
 					// header tells us the time at which we can request again.
@@ -971,12 +976,12 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 						} else {
 							err = fmt.Errorf("sleep time for token reset exceeds max sleep time (%v > %v)", sleepTime, c.maxSleepTime)
 							resp.Body.Close()
-							break
+							break loop
 						}
 					} else {
 						err = fmt.Errorf("failed to parse rate limit reset unix time %q: %w", resp.Header.Get("X-RateLimit-Reset"), err)
 						resp.Body.Close()
-						break
+						break loop
 					}
 				} else if rawTime := resp.Header.Get("Retry-After"); rawTime != "" && rawTime != "0" {
 					// If we are getting abuse rate limited, we need to wait or
@@ -992,12 +997,12 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 						} else {
 							err = fmt.Errorf("sleep time for abuse rate limit exceeds max sleep time (%v > %v)", sleepTime, c.maxSleepTime)
 							resp.Body.Close()
-							break
+							break loop
 						}
 					} else {
 						err = fmt.Errorf("failed to parse abuse rate limit wait time %q: %w", rawTime, err)
 						resp.Body.Close()
-						break
+						break loop
 					}
 				} else {
 					acceptedScopes := resp.Header.Get("X-Accepted-OAuth-Scopes")
@@ -1021,23 +1026,28 @@ func (c *client) requestRetryWithContext(ctx context.Context, method, path, acce
 						err = fmt.Errorf("the GitHub API request returns a 403 error: %s", string(body))
 					}
 					resp.Body.Close()
-					break
+					break loop
 				}
-			} else if resp.StatusCode < 500 {
+
+			case resp.StatusCode < 500:
 				// Normal, happy case.
-				break
-			} else {
+				break loop
+
+			default:
 				// Retry 500 after a break.
 				c.logger.WithField("backoff", backoff.String()).Debug("Retrying 5XX")
 				c.time.Sleep(backoff)
 				backoff *= 2
 			}
-		} else if errors.Is(err, &appsAuthError{}) {
+
+		case errors.Is(err, &appsAuthError{}):
 			c.logger.WithError(err).Error("Stopping retry due to appsAuthError")
 			return resp, err
-		} else if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+
+		case errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded):
 			return resp, err
-		} else {
+
+		default:
 			// Connection problem. Try a different host.
 			oldHostIndex := hostIndex
 			hostIndex = (hostIndex + 1) % len(c.bases)
@@ -1262,19 +1272,24 @@ func (c *client) IsMember(org, user string) (bool, error) {
 		return true, nil
 	}
 	code, err := c.request(&request{
-		method:    http.MethodGet,
-		path:      fmt.Sprintf("/orgs/%s/members/%s", org, user),
-		org:       org,
-		exitCodes: []int{204, 404, 302},
+		method: http.MethodGet,
+		path:   fmt.Sprintf("/orgs/%s/members/%s", org, user),
+		org:    org,
+		exitCodes: []int{
+			http.StatusNoContent,
+			http.StatusNotFound,
+			http.StatusFound,
+		},
 	}, nil)
 	if err != nil {
 		return false, err
 	}
-	if code == 204 {
+	switch code {
+	case http.StatusNoContent:
 		return true, nil
-	} else if code == 404 {
+	case http.StatusNotFound:
 		return false, nil
-	} else if code == 302 {
+	case http.StatusFound:
 		return false, fmt.Errorf("requester is not %s org member", org)
 	}
 	// Should be unreachable.
@@ -2414,16 +2429,16 @@ func (c *client) ListReviews(org, repo string, number int) ([]Review, error) {
 // CreateStatus creates or updates the status of a commit.
 //
 // See https://docs.github.com/en/rest/reference/commits#create-a-commit-status
-func (c *client) CreateStatus(org, repo, SHA string, s Status) error {
-	return c.CreateStatusWithContext(context.Background(), org, repo, SHA, s)
+func (c *client) CreateStatus(org, repo, sha string, s Status) error {
+	return c.CreateStatusWithContext(context.Background(), org, repo, sha, s)
 }
 
-func (c *client) CreateStatusWithContext(ctx context.Context, org, repo, SHA string, s Status) error {
-	durationLogger := c.log("CreateStatus", org, repo, SHA, s)
+func (c *client) CreateStatusWithContext(ctx context.Context, org, repo, sha string, s Status) error {
+	durationLogger := c.log("CreateStatus", org, repo, sha, s)
 	defer durationLogger()
 	_, err := c.requestWithContext(ctx, &request{
 		method:      http.MethodPost,
-		path:        fmt.Sprintf("/repos/%s/%s/statuses/%s", org, repo, SHA),
+		path:        fmt.Sprintf("/repos/%s/%s/statuses/%s", org, repo, sha),
 		org:         org,
 		requestBody: &s,
 		exitCodes:   []int{201},
@@ -2587,14 +2602,14 @@ func (c *client) ListTags(org, repo string) ([]GitHubTag, error) {
 // GetSingleCommit returns a single commit.
 //
 // See https://developer.github.com/v3/repos/#get
-func (c *client) GetSingleCommit(org, repo, SHA string) (RepositoryCommit, error) {
-	durationLogger := c.log("GetSingleCommit", org, repo, SHA)
+func (c *client) GetSingleCommit(org, repo, sha string) (RepositoryCommit, error) {
+	durationLogger := c.log("GetSingleCommit", org, repo, sha)
 	defer durationLogger()
 
 	var commit RepositoryCommit
 	_, err := c.request(&request{
 		method:    http.MethodGet,
-		path:      fmt.Sprintf("/repos/%s/%s/commits/%s", org, repo, SHA),
+		path:      fmt.Sprintf("/repos/%s/%s/commits/%s", org, repo, sha),
 		org:       org,
 		exitCodes: []int{200},
 	}, &commit)
@@ -3071,18 +3086,18 @@ func prepareReviewersBody(logins []string, org string) (map[string][]string, err
 	body := map[string][]string{}
 	var errors []error
 	for _, login := range logins {
-		mat := teamRe.FindStringSubmatch(login)
-		if mat == nil {
+		switch mat := teamRe.FindStringSubmatch(login); {
+		case mat == nil:
 			if _, exists := body["reviewers"]; !exists {
 				body["reviewers"] = []string{}
 			}
 			body["reviewers"] = append(body["reviewers"], login)
-		} else if mat[1] == org {
+		case mat[1] == org:
 			if _, exists := body["team_reviewers"]; !exists {
 				body["team_reviewers"] = []string{}
 			}
 			body["team_reviewers"] = append(body["team_reviewers"], mat[2])
-		} else {
+		default:
 			errors = append(errors, fmt.Errorf("team %s is not part of %s org", login, org))
 		}
 	}
@@ -4219,7 +4234,7 @@ func (c *client) ListIssueEvents(org, repo string, num int) ([]ListedIssueEvent,
 // IsMergeable determines if a PR can be merged.
 // Mergeability is calculated by a background job on GitHub and is not immediately available when
 // new commits are added so the PR must be polled until the background job completes.
-func (c *client) IsMergeable(org, repo string, number int, SHA string) (bool, error) {
+func (c *client) IsMergeable(org, repo string, number int, sha string) (bool, error) {
 	backoff := time.Second * 3
 	maxTries := 3
 	for try := 0; try < maxTries; try++ {
@@ -4227,8 +4242,8 @@ func (c *client) IsMergeable(org, repo string, number int, SHA string) (bool, er
 		if err != nil {
 			return false, err
 		}
-		if pr.Head.SHA != SHA {
-			return false, fmt.Errorf("pull request head changed while checking mergeability (%s -> %s)", SHA, pr.Head.SHA)
+		if pr.Head.SHA != sha {
+			return false, fmt.Errorf("pull request head changed while checking mergeability (%s -> %s)", sha, pr.Head.SHA)
 		}
 		if pr.Merged {
 			return false, errors.New("pull request was merged while checking mergeability")

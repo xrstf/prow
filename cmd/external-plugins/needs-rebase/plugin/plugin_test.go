@@ -576,7 +576,7 @@ func getFakeTime() timeNow {
 	var i = 0
 	now := time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)
 	return func() time.Time {
-		i = i + 1
+		i++
 		return now.Add(time.Duration(i) * time.Second)
 	}
 }

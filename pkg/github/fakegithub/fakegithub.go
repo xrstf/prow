@@ -289,17 +289,17 @@ func (f *FakeClient) CreateCommentWithContext(_ context.Context, owner, repo str
 }
 
 // EditComment edits a comment.
-func (f *FakeClient) EditComment(org, repo string, ID int, comment string) error {
-	return f.EditCommentWithContext(context.Background(), org, repo, ID, comment)
+func (f *FakeClient) EditComment(org, repo string, id int, comment string) error {
+	return f.EditCommentWithContext(context.Background(), org, repo, id, comment)
 }
 
-func (f *FakeClient) EditCommentWithContext(_ context.Context, org, repo string, ID int, comment string) error {
+func (f *FakeClient) EditCommentWithContext(_ context.Context, org, repo string, id int, comment string) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
-	f.IssueCommentsEdited = append(f.IssueCommentsEdited, fmt.Sprintf("%s/%s#%d:%s", org, repo, ID, comment))
+	f.IssueCommentsEdited = append(f.IssueCommentsEdited, fmt.Sprintf("%s/%s#%d:%s", org, repo, id, comment))
 	for _, ics := range f.IssueComments {
 		for _, ic := range ics {
-			if ic.ID == ID {
+			if ic.ID == id {
 				ic.Body = comment
 			}
 		}
@@ -321,39 +321,39 @@ func (f *FakeClient) CreateReview(org, repo string, number int, r github.DraftRe
 }
 
 // CreateCommentReaction adds emoji to a comment.
-func (f *FakeClient) CreateCommentReaction(org, repo string, ID int, reaction string) error {
+func (f *FakeClient) CreateCommentReaction(org, repo string, id int, reaction string) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
-	f.CommentReactionsAdded = append(f.CommentReactionsAdded, fmt.Sprintf("%s/%s#%d:%s", org, repo, ID, reaction))
+	f.CommentReactionsAdded = append(f.CommentReactionsAdded, fmt.Sprintf("%s/%s#%d:%s", org, repo, id, reaction))
 	return nil
 }
 
 // CreateIssueReaction adds an emoji to an issue.
-func (f *FakeClient) CreateIssueReaction(org, repo string, ID int, reaction string) error {
+func (f *FakeClient) CreateIssueReaction(org, repo string, id int, reaction string) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
-	f.IssueReactionsAdded = append(f.IssueReactionsAdded, fmt.Sprintf("%s/%s#%d:%s", org, repo, ID, reaction))
+	f.IssueReactionsAdded = append(f.IssueReactionsAdded, fmt.Sprintf("%s/%s#%d:%s", org, repo, id, reaction))
 	return nil
 }
 
 // DeleteComment deletes a comment.
-func (f *FakeClient) DeleteComment(owner, repo string, ID int) error {
-	return f.DeleteCommentWithContext(context.Background(), owner, repo, ID)
+func (f *FakeClient) DeleteComment(owner, repo string, id int) error {
+	return f.DeleteCommentWithContext(context.Background(), owner, repo, id)
 }
 
-func (f *FakeClient) DeleteCommentWithContext(_ context.Context, owner, repo string, ID int) error {
+func (f *FakeClient) DeleteCommentWithContext(_ context.Context, owner, repo string, id int) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
-	f.IssueCommentsDeleted = append(f.IssueCommentsDeleted, fmt.Sprintf("%s/%s#%d", owner, repo, ID))
+	f.IssueCommentsDeleted = append(f.IssueCommentsDeleted, fmt.Sprintf("%s/%s#%d", owner, repo, id))
 	for num, ics := range f.IssueComments {
 		for i, ic := range ics {
-			if ic.ID == ID {
+			if ic.ID == id {
 				f.IssueComments[num] = append(ics[:i], ics[i+1:]...)
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("could not find issue comment %d", ID)
+	return fmt.Errorf("could not find issue comment %d", id)
 }
 
 // DeleteStaleComments deletes comments flagged by isStale.
@@ -498,17 +498,17 @@ func (f *FakeClient) DeleteRef(owner, repo, ref string) error {
 }
 
 // GetSingleCommit returns a single commit.
-func (f *FakeClient) GetSingleCommit(org, repo, SHA string) (github.RepositoryCommit, error) {
+func (f *FakeClient) GetSingleCommit(org, repo, sha string) (github.RepositoryCommit, error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
-	return f.Commits[SHA], nil
+	return f.Commits[sha], nil
 }
 
 // CreateStatus adds a status context to a commit.
-func (f *FakeClient) CreateStatus(owner, repo, SHA string, s github.Status) error {
-	return f.CreateStatusWithContext(context.Background(), owner, repo, SHA, s)
+func (f *FakeClient) CreateStatus(owner, repo, sha string, s github.Status) error {
+	return f.CreateStatusWithContext(context.Background(), owner, repo, sha, s)
 }
-func (f *FakeClient) CreateStatusWithContext(_ context.Context, owner, repo, SHA string, s github.Status) error {
+func (f *FakeClient) CreateStatusWithContext(_ context.Context, owner, repo, sha string, s github.Status) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	if f.Error != nil {
@@ -517,7 +517,7 @@ func (f *FakeClient) CreateStatusWithContext(_ context.Context, owner, repo, SHA
 	if f.CreatedStatuses == nil {
 		f.CreatedStatuses = make(map[string][]github.Status)
 	}
-	statuses := f.CreatedStatuses[SHA]
+	statuses := f.CreatedStatuses[sha]
 	var updated bool
 	for i := range statuses {
 		if statuses[i].Context == s.Context {
@@ -528,9 +528,9 @@ func (f *FakeClient) CreateStatusWithContext(_ context.Context, owner, repo, SHA
 	if !updated {
 		statuses = append(statuses, s)
 	}
-	f.CreatedStatuses[SHA] = statuses
-	f.CombinedStatuses[SHA] = &github.CombinedStatus{
-		SHA:      SHA,
+	f.CreatedStatuses[sha] = statuses
+	f.CombinedStatuses[sha] = &github.CombinedStatus{
+		SHA:      sha,
 		Statuses: statuses,
 	}
 	return nil

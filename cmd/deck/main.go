@@ -405,10 +405,8 @@ func main() {
 			if err != nil {
 				logrus.WithError(err).Fatal("Error getting Git client.")
 			}
-		} else {
-			if len(cfg().InRepoConfig.Enabled) > 0 {
-				logrus.Info(" --github-token-path not configured. InRepoConfigEnabled, but current configuration won't display full PR history")
-			}
+		} else if len(cfg().InRepoConfig.Enabled) > 0 {
+			logrus.Info(" --github-token-path not configured. InRepoConfigEnabled, but current configuration won't display full PR history")
 		}
 
 		buildClusterClients, err := o.kubernetes.BuildClusterClients(cfg().PodNamespace, false)

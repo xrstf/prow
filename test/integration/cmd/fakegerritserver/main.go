@@ -69,7 +69,7 @@ func main() {
 
 	// Handle authenticated and non-authenticated requests the same way for now.
 	for _, r := range []*mux.Router{rMain, rAuthed} {
-		//GetChange GET
+		// GetChange GET
 		r.Path("/changes/{change-id}").Handler(response(changesHandler(fakeClient)))
 		// SetReview POST
 		r.Path("/changes/{change-id}/revisions/{revision-id}/review").Handler(response(changesHandler(fakeClient)))

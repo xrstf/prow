@@ -145,11 +145,12 @@ func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, p
 	url := ""
 	if mat == nil {
 		// check is this one of the famous.dog
-		if fineRegex.FindStringSubmatch(e.Body) != nil {
+		switch {
+		case fineRegex.FindStringSubmatch(e.Body) != nil:
 			url = fineImagesRoot + fineIMG
-		} else if notFineRegex.FindStringSubmatch(e.Body) != nil {
+		case notFineRegex.FindStringSubmatch(e.Body) != nil:
 			url = fineImagesRoot + notFineIMG
-		} else if unbearableRegex.FindStringSubmatch(e.Body) != nil {
+		case unbearableRegex.FindStringSubmatch(e.Body) != nil:
 			url = fineImagesRoot + unbearableIMG
 		}
 
