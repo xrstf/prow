@@ -229,13 +229,6 @@ type CopyableRegexp struct {
 func (in *CopyableRegexp) DeepCopyInto(out *CopyableRegexp) {
 	// We use the deprecated Regexp.Copy() function here, because it's better to
 	// defer to the package's own Copy() method instead of creating our own.
-	//
-	// Unfortunately there is no way to tell golangci-lint (our linter) to only
-	// ignore the check SA1019 (Using a deprecated function, variable, constant
-	// or field), and we have to disable the entire staticcheck linter for this
-	// one line of code.
-	//
-	// nolint:staticcheck
 	*out = CopyableRegexp{in.Copy()}
 }
 
