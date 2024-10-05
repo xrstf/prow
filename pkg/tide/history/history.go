@@ -255,7 +255,7 @@ func (rl *recordLog) toSlice() []*Record {
 	}
 
 	res := make([]*Record, 0, len(rl.buff))
-	for i := 0; i < len(rl.buff); i++ {
+	for i := range rl.buff {
 		index := (rl.limit + rl.head - i) % rl.limit
 		res = append(res, rl.buff[index])
 	}

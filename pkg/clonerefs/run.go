@@ -134,7 +134,7 @@ func (o *Options) createRecords() []clone.Record {
 
 	input := make(chan prowapi.Refs)
 	output := make(chan clone.Record, len(o.GitRefs))
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go func() {
 			defer wg.Done()
 			for ref := range input {

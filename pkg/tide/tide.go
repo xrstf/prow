@@ -583,7 +583,7 @@ func subpoolsInParallel(goroutines int, sps map[string]*subpool, process func(*s
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
-	for i := 0; i < goroutines; i++ {
+	for range goroutines {
 		go func() {
 			defer wg.Done()
 			for sp := range queue {
@@ -1302,7 +1302,7 @@ func tryMerge(mergeFunc func() error) (bool, error) {
 	var err error
 	const maxRetries = 3
 	backoff := time.Second * 4
-	for retry := 0; retry < maxRetries; retry++ {
+	for retry := range maxRetries {
 		if err = mergeFunc(); err == nil {
 			// Successful merge!
 			return true, nil

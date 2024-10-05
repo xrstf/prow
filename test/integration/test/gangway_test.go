@@ -491,7 +491,7 @@ func TestGangwayBulkJobStatusChange(t *testing.T) {
 			ctx = c.EmbedProjectNumber(ctx)
 			cleanup(t, ctx)
 			jobExecutions := []*gangway.JobExecution{}
-			for i := 0; i < tt.count; i++ {
+			for range tt.count {
 				jobExecution, err := c.GRPC.CreateJobExecution(ctx, tt.creationMsg)
 				if err != nil {
 					t.Fatalf("Failed to create job execution: %v", err)

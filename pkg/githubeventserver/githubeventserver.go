@@ -523,7 +523,7 @@ func (s *serveMuxHandler) do(req *http.Request) (*http.Response, error) {
 	backoff := 100 * time.Millisecond
 	maxRetries := 5
 
-	for retries := 0; retries < maxRetries; retries++ {
+	for range maxRetries {
 		resp, err = s.c.Do(req)
 		if err == nil {
 			break

@@ -25,6 +25,7 @@ linters:
     - gosimple
     - govet
     - ineffassign
+    - intrange
     - misspell
     - staticcheck
     - unused

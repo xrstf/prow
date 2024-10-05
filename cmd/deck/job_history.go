@@ -518,7 +518,7 @@ func getJobHistory(ctx context.Context, url *url.URL, cfg config.Getter, opener 
 			bch <- b
 		}(i, buildID)
 	}
-	for i := 0; i < len(shownIDs); i++ {
+	for range len(shownIDs) {
 		b := <-bch
 		tmpl.Builds[b.index] = b
 	}

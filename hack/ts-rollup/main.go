@@ -184,7 +184,7 @@ func main() {
 	// Start workers
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	for i := 0; i < o.workers; i++ {
+	for range o.workers {
 		go func(ctx context.Context, packageChan chan packageInfo, errChan chan error, doneChan chan packageInfo) {
 			for {
 				select {

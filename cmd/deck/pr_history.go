@@ -160,7 +160,7 @@ func getPRBuildData(ctx context.Context, bucket storageBucket, jobs []jobBuilds)
 		}
 	}
 	builds := []buildData{}
-	for k := 0; k < expected; k++ {
+	for range expected {
 		build := <-buildch
 		builds = append(builds, build)
 	}

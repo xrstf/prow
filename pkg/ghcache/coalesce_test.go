@@ -83,7 +83,7 @@ func TestRoundTrip(t *testing.T) {
 	}
 	wg := sync.WaitGroup{}
 	wg.Add(100)
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		go func() {
 			if _, err := runRequest(coalescer, "/resource1", false); err != nil {
 				t.Errorf("Failed to run request: %v.", err)

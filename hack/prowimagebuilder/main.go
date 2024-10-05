@@ -323,7 +323,7 @@ func main() {
 	// Start workers
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	for i := 0; i < o.workers; i++ {
+	for range o.workers {
 		go func(ctx context.Context, imageChan chan imageDef, errChan chan error, doneChan chan imageDef) {
 			for {
 				select {

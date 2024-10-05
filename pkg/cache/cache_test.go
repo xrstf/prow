@@ -253,7 +253,7 @@ func TestGetOrAddBurst(t *testing.T) {
 	// Consider the case where all threads perform the same cache lookup.
 	expectedVal := "(val)input=3,steps=7,max=16"
 	wg.Add(maxConcurrentRequests)
-	for i := 0; i < maxConcurrentRequests; i++ {
+	for range maxConcurrentRequests {
 		go func() {
 			// Input of 3 for goodValConstructor will take 7 steps and reach a
 			// maximum value of 16. We check this below.
@@ -286,7 +286,7 @@ func TestGetOrAddBurst(t *testing.T) {
 
 	// Consider the case where all threads perform one of 5 different cache lookups.
 	wg.Add(maxConcurrentRequests)
-	for i := 0; i < maxConcurrentRequests; i++ {
+	for i := range maxConcurrentRequests {
 		j := (i % 5) + 1
 		expectedVal := ""
 		go func() {

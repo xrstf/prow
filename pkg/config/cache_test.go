@@ -809,7 +809,7 @@ func TestGetProwYAMLCachedAndDefaulted(t *testing.T) {
 			// initial Config.
 			// Make sure that this runs concurrently without problem.
 			var errGroup errgroup.Group
-			for i := 0; i < 1000; i++ {
+			for range 1000 {
 				errGroup.Go(func() error {
 					presubmits, err := cache.GetPresubmits(identifier, baseBranch, baseSHAGetter, headSHAGetters...)
 					if err != nil {

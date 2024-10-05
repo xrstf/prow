@@ -4323,7 +4323,7 @@ func TestDeduplicateContestsDoesntLoseData(t *testing.T) {
 	// Print the seed so failures can easily be reproduced
 	t.Logf("Seed: %d", seed)
 	fuzzer := fuzz.NewWithSeed(seed)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			context := Context{}
 			fuzzer.Fuzz(&context)
