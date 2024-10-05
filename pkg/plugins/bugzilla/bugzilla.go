@@ -563,7 +563,7 @@ type emailToLoginQuery struct {
 	Search querySearch `graphql:"search(type:USER query:$email first:5)"`
 }
 
-// processQueryResult generates a response based on a populated emailToLoginQuery
+// processQuery generates a response based on a populated emailToLoginQuery
 func processQuery(query *emailToLoginQuery, email string, log *logrus.Entry) string {
 	switch len(query.Search.Edges) {
 	case 0:
@@ -686,15 +686,16 @@ To reference a bug, add 'Bug XXX:' to the title of this pull request and request
 
 			// identify qa contact via email if possible
 			explicitQARequest := e.assign || e.cc
-			if bug.QAContactDetail == nil {
+			switch {
+			case bug.QAContactDetail == nil:
 				if explicitQARequest {
 					response += fmt.Sprintf(bugLink+" does not have a QA contact, skipping assignment", e.bugId, bc.Endpoint(), e.bugId)
 				}
-			} else if bug.QAContactDetail.Email == "" {
+			case bug.QAContactDetail.Email == "":
 				if explicitQARequest {
 					response += fmt.Sprintf("QA contact for "+bugLink+" does not have a listed email, skipping assignment", e.bugId, bc.Endpoint(), e.bugId)
 				}
-			} else {
+			default:
 				query := &emailToLoginQuery{}
 				email := bug.QAContactDetail.Email
 				queryVars := map[string]interface{}{
@@ -810,7 +811,7 @@ func getSeverityLabel(severity string) string {
 	case unspecifiedSeverity:
 		return labels.BugzillaSeverityUnspecified
 	}
-	//If we don't understand the severity, don't set it but don't error.
+	// If we don't understand the severity, don't set it but don't error.
 	return ""
 }
 
@@ -858,16 +859,17 @@ func validateBug(bug bugzilla.Bug, dependents []bugzilla.Bug, options plugins.Bu
 	}
 
 	if options.TargetRelease != nil {
-		if len(bug.TargetRelease) == 0 {
+		switch {
+		case len(bug.TargetRelease) == 0:
 			valid = false
 			errors = append(errors, fmt.Sprintf("expected the bug to target the %q release, but no target release was set", *options.TargetRelease))
-		} else if *options.TargetRelease != bug.TargetRelease[0] {
+		case *options.TargetRelease != bug.TargetRelease[0]:
 			// the BugZilla web UI shows one option for target release, but returns the
 			// field as a list in the REST API. We only care for the first item and it's
 			// not even clear if the list can have more than one item in the response
 			valid = false
 			errors = append(errors, fmt.Sprintf("expected the bug to target the %q release, but it targets %q instead", *options.TargetRelease, bug.TargetRelease[0]))
-		} else {
+		default:
 			validations = append(validations, fmt.Sprintf("bug target release (%s) matches configured target release for branch (%s)", bug.TargetRelease[0], *options.TargetRelease))
 		}
 	}

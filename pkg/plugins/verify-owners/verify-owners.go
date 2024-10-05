@@ -372,6 +372,8 @@ func handle(ghc githubClient, gc git.ClientFactory, roc repoownersClient, log *l
 	return nil
 }
 
+var lineNumberRe = regexp.MustCompile(`line (\d+)`)
+
 func parseOwnersFile(oc ownersClient, path string, c github.PullRequestChange, log *logrus.Entry, bannedLabels []string, filenames ownersconfig.Filenames) (*messageWithLine, []string) {
 	var reviewers []string
 	var approvers []string
@@ -389,7 +391,6 @@ func parseOwnersFile(oc ownersClient, path string, c github.PullRequestChange, l
 			return nil, nil
 		}
 		if err != nil {
-			lineNumberRe, _ := regexp.Compile(`line (\d+)`)
 			lineNumberMatches := lineNumberRe.FindStringSubmatch(err.Error())
 			// try to find a line number for the error
 			if len(lineNumberMatches) > 1 {
@@ -434,7 +435,8 @@ func parseOwnersFile(oc ownersClient, path string, c github.PullRequestChange, l
 			fmt.Sprintf("No approvers defined in this root directory %s file.", filenames.Owners),
 		}, nil
 	}
-	owners := append(reviewers, approvers...)
+	owners := append([]string{}, reviewers...)
+	owners = append(owners, approvers...)
 	return nil, owners
 }
 

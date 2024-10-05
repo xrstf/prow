@@ -1123,6 +1123,6 @@ type prNumberGenerator struct {
 func (p *prNumberGenerator) GetPRNumber() int {
 	p.Lock()
 	defer p.Unlock()
-	p.prNumber = p.prNumber + 10
+	p.prNumber += 10
 	return p.prNumber
 }

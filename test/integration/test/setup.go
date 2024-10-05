@@ -124,10 +124,10 @@ func refreshProwPods(client ctrlruntimeclient.Client, ctx context.Context, name 
 // RandomString generates random string of 32 characters in length, and fail if it failed
 func RandomString(t *testing.T) string {
 	b := make([]byte, 512)
-	if _, err := rand.Read(b[:]); err != nil {
+	if _, err := rand.Read(b); err != nil {
 		t.Fatalf("failed to generate random: %v", err)
 	}
-	return fmt.Sprintf("%x", sha256.Sum256(b[:]))[:32]
+	return fmt.Sprintf("%x", sha256.Sum256(b))[:32]
 }
 
 func updateJobConfig(ctx context.Context, kubeClient ctrlruntimeclient.Client, filename string, rawConfig []byte) error {

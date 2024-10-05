@@ -82,13 +82,14 @@ func TestGetBug(t *testing.T) {
 			http.Error(w, "400 Bad Request", http.StatusBadRequest)
 			return
 		} else {
-			if id == 1705243 {
+			switch id {
+			case 1705243:
 				w.Write(bugData)
-			} else if id == 2 {
+			case 2:
 				w.Write(bugAccessDenied)
-			} else if id == 3 {
+			case 3:
 				w.Write(bugInvalidBugID)
-			} else {
+			default:
 				http.Error(w, "404 Not Found", http.StatusNotFound)
 			}
 		}
@@ -269,13 +270,14 @@ func TestGetComments(t *testing.T) {
 			t.Errorf("malformed bug id: %s", r.URL.Path)
 			http.Error(w, "400 Bad Request", http.StatusBadRequest)
 		} else {
-			if id == 12345 {
+			switch id {
+			case 12345:
 				w.Write(commentsJSON)
-			} else if id == 2 {
+			case 2:
 				w.Write(bugAccessDenied)
-			} else if id == 3 {
+			case 3:
 				w.Write(bugInvalidBugID)
-			} else {
+			default:
 				http.Error(w, "404 Not Found", http.StatusNotFound)
 			}
 		}
@@ -519,7 +521,8 @@ func TestUpdateBug(t *testing.T) {
 			http.Error(w, "400 Bad Request", http.StatusBadRequest)
 			return
 		} else {
-			if id == 1705243 {
+			switch id {
+			case 1705243:
 				raw, err := io.ReadAll(r.Body)
 				if err != nil {
 					t.Errorf("failed to read update body: %v", err)
@@ -527,11 +530,11 @@ func TestUpdateBug(t *testing.T) {
 				if actual, expected := string(raw), `{"depends_on":{"add":[1705242]},"status":"UPDATED"}`; actual != expected {
 					t.Errorf("got incorrect update: expected %v, got %v", expected, actual)
 				}
-			} else if id == 2 {
+			case 2:
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				fmt.Fprintln(w, `{"documentation":"https://bugzilla.redhat.com/docs/en/html/api/index.html","error":true,"code":32000,"message":"Subcomponet is mandatory for the component 'Cloud Compute' in the product 'OpenShift Container Platform'."}`)
-			} else {
+			default:
 				http.Error(w, "404 Not Found", http.StatusNotFound)
 			}
 		}

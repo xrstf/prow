@@ -242,14 +242,15 @@ func NewClientFactory(opts ...ClientFactoryOpt) (ClientFactory, error) {
 	}
 
 	var remote RemoteResolverFactory
-	if o.UseSSH != nil && *o.UseSSH {
+	switch {
+	case o.UseSSH != nil && *o.UseSSH:
 		remote = &sshRemoteResolverFactory{
 			host:     o.Host,
 			username: o.Username,
 		}
-	} else if o.CookieFilePath != "" {
+	case o.CookieFilePath != "":
 		remote = &gerritResolverFactory{}
-	} else {
+	default:
 		remote = &httpResolverFactory{
 			host:     o.Host,
 			http:     o.UseInsecureHTTP != nil && *o.UseInsecureHTTP,
@@ -257,6 +258,7 @@ func NewClientFactory(opts ...ClientFactoryOpt) (ClientFactory, error) {
 			token:    o.Token,
 		}
 	}
+
 	return &clientFactory{
 		cacheDir:       cacheDir,
 		cacheDirBase:   *o.CacheDirBase,

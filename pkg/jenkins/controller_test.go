@@ -176,12 +176,12 @@ func (f *fghc) CreateCommentWithContext(_ context.Context, org, repo string, num
 	defer f.Unlock()
 	return nil
 }
-func (f *fghc) DeleteCommentWithContext(_ context.Context, org, repo string, ID int) error {
+func (f *fghc) DeleteCommentWithContext(_ context.Context, org, repo string, id int) error {
 	f.Lock()
 	defer f.Unlock()
 	return nil
 }
-func (f *fghc) EditCommentWithContext(_ context.Context, org, repo string, ID int, comment string) error {
+func (f *fghc) EditCommentWithContext(_ context.Context, org, repo string, id int, comment string) error {
 	f.Lock()
 	defer f.Unlock()
 	return nil

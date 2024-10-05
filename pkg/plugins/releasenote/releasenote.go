@@ -256,7 +256,7 @@ func handlePR(gc githubClient, log *logrus.Entry, pr *github.PullRequestEvent) e
 	labelToAdd := determineReleaseNoteLabel(pr.PullRequest.Body, prLabels)
 
 	if labelToAdd == labels.ReleaseNoteLabelNeeded {
-		//Do not add do not merge label when the PR is merged
+		// Do not add do not merge label when the PR is merged
 		if pr.PullRequest.Merged {
 			return nil
 		}
@@ -509,9 +509,11 @@ func editReleaseNote(gc githubClient, log *logrus.Entry, ic github.IssueCommentE
 	}
 	// Splice in the contents of the new release note block to the top level comment
 	// This accounts for all older regex matches
-	b := []byte(ic.Issue.Body)
-	replaced := append(b[:i[2]], append([]byte("\r\n"+strings.TrimSpace(newNote)+"\r\n"), b[i[3]:]...)...)
-	ic.Issue.Body = string(replaced)
+	body := []byte(ic.Issue.Body)
+	newBody := append([]byte{}, body[:i[2]]...)
+	newBody = append(newBody, []byte("\r\n"+strings.TrimSpace(newNote)+"\r\n")...)
+	newBody = append(newBody, body[i[3]:]...)
+	ic.Issue.Body = string(newBody)
 
 	_, err = gc.EditIssue(ic.Repo.Owner.Login, ic.Repo.Name, ic.Issue.Number, &ic.Issue)
 	if err != nil {

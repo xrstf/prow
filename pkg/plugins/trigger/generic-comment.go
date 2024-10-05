@@ -231,7 +231,7 @@ func getContexts(combinedStatus *github.CombinedStatus) (sets.Set[string], sets.
 	return failedContexts, allContexts
 }
 
-func addHelpComment(githubClient githubClient, body, org, repo, branch string, number int, presubmits []config.Presubmit, HTMLURL, user, note string, logger *logrus.Entry) error {
+func addHelpComment(githubClient githubClient, body, org, repo, branch string, number int, presubmits []config.Presubmit, htmlURL, user, note string, logger *logrus.Entry) error {
 	changes := config.NewGitHubDeferredChangedFilesProvider(githubClient, org, repo, number)
 	testAllNames, optionalJobsCommands, requiredJobsCommands, err := pjutil.AvailablePresubmits(changes, branch, presubmits, logger)
 	if err != nil {
@@ -239,5 +239,5 @@ func addHelpComment(githubClient githubClient, body, org, repo, branch string, n
 	}
 
 	resp := pjutil.HelpMessage(org, repo, branch, note, testAllNames, optionalJobsCommands, requiredJobsCommands)
-	return githubClient.CreateComment(org, repo, number, plugins.FormatResponseRaw(body, HTMLURL, user, resp))
+	return githubClient.CreateComment(org, repo, number, plugins.FormatResponseRaw(body, htmlURL, user, resp))
 }

@@ -62,25 +62,34 @@ func (o *options) Validate() error {
 	return nil
 }
 
+func fetchProwConfig(o options) ([]byte, error) {
+	// TODO: Retries
+	resp, err := http.Get(o.prowURL + "/config")
+	if err != nil {
+		return nil, fmt.Errorf("cannot get prow config: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("status code not 2XX: %v", resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read request body: %w", err)
+	}
+
+	return data, nil
+}
+
 func main() {
 	o := gatherOptions()
 	if err := o.Validate(); err != nil {
 		logrus.Fatalf("Invalid options: %v", err)
 	}
 
-	// TODO: Retries
-	resp, err := http.Get(o.prowURL + "/config")
+	data, err := fetchProwConfig(o)
 	if err != nil {
-		logrus.Fatalf("cannot get prow config: %v", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		logrus.Fatalf("status code not 2XX: %v", resp.Status)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logrus.Fatalf("cannot read request body: %v", err)
+		logrus.Fatalf("cannot read prow config: %v", err)
 	}
 
 	cfg := &config.Config{}

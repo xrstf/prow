@@ -104,8 +104,8 @@ func TestGatherOptions(t *testing.T) {
 				tc.expected(expected)
 			}
 
-			args := append(tc.args,
-				"--config-path=yo")
+			args := append([]string{}, tc.args...)
+			args = append(args, "--config-path=yo")
 			fs := flag.NewFlagSet("fake-flags", flag.PanicOnError)
 			actual := gatherOptions(fs, args...)
 			switch err := actual.Validate(); {

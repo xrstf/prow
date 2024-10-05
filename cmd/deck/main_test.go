@@ -249,7 +249,7 @@ func TestHandleLog(t *testing.T) {
 			t.Errorf("Wrong error code. Got %v, want %v", rr.Code, tc.code)
 		} else if rr.Code == http.StatusOK {
 			if follow {
-				//wait a little to get the chunks
+				// wait a little to get the chunks
 				time.Sleep(2 * time.Millisecond)
 				reader := bufio.NewReader(rr.Body)
 				var buf bytes.Buffer

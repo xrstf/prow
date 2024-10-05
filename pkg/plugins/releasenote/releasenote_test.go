@@ -200,11 +200,13 @@ func TestReleaseNoteComment(t *testing.T) {
 		if tc.shouldComment && len(fc.IssueComments[5]) == 0 {
 			t.Errorf("For case %s, didn't comment but should have.", tc.name)
 		}
-		if len(fc.IssueLabelsAdded) > 1 {
+
+		switch {
+		case len(fc.IssueLabelsAdded) > 1:
 			t.Errorf("For case %s, added more than one label: %v", tc.name, fc.IssueLabelsAdded)
-		} else if len(fc.IssueLabelsAdded) == 0 && tc.addedLabel != "" {
+		case len(fc.IssueLabelsAdded) == 0 && tc.addedLabel != "":
 			t.Errorf("For case %s, should have added %s but didn't.", tc.name, tc.addedLabel)
-		} else if len(fc.IssueLabelsAdded) == 1 && fc.IssueLabelsAdded[0] != "/#5:"+tc.addedLabel {
+		case len(fc.IssueLabelsAdded) == 1 && fc.IssueLabelsAdded[0] != "/#5:"+tc.addedLabel:
 			t.Errorf("For case %s, added wrong label. Got %s, expected %s", tc.name, fc.IssueLabelsAdded[0], tc.addedLabel)
 		}
 

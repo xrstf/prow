@@ -91,7 +91,7 @@ func GetBuildID(name, totURL string) (string, error) {
 	for retries := 0; retries < 10; retries++ {
 		if retries > 0 {
 			sleep(sleepDuration)
-			sleepDuration = sleepDuration * 2
+			sleepDuration *= 2
 		}
 		var resp *http.Response
 		resp, err = http.Get(url.String())

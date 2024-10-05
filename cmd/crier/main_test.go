@@ -37,7 +37,7 @@ func TestOptions(t *testing.T) {
 		args     []string
 		expected *options
 	}{
-		//General
+		// General
 		{
 			name: "no args, reject",
 			args: []string{},
@@ -46,7 +46,7 @@ func TestOptions(t *testing.T) {
 			name: "config-path is empty string, reject",
 			args: []string{"--pubsub-workers=1", "--config-path="},
 		},
-		//Gerrit Reporter
+		// Gerrit Reporter
 		{
 			name: "gerrit supports multiple workers",
 			args: []string{"--gerrit-workers=99", "--cookiefile=foobar", "--config-path=foo"},
@@ -82,7 +82,7 @@ func TestOptions(t *testing.T) {
 				instrumentationOptions: flagutil.DefaultInstrumentationOptions(),
 			},
 		},
-		//PubSub Reporter
+		// PubSub Reporter
 		{
 			name: "pubsub workers, sets workers",
 			args: []string{"--pubsub-workers=7", "--config-path=baz"},
@@ -104,7 +104,7 @@ func TestOptions(t *testing.T) {
 			name: "pubsub workers set to negative, rejects",
 			args: []string{"--pubsub-workers=-3", "--config-path=foo"},
 		},
-		//Slack Reporter
+		// Slack Reporter
 		{
 			name: "slack workers, sets workers",
 			args: []string{"--slack-workers=13", "--slack-token-file=/bar/baz", "--config-path=foo"},

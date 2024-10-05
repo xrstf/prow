@@ -321,11 +321,12 @@ func makeFakeRepoOwnersClient() fakeRepoownersClient {
 func addFilesToRepo(lg *localgit.LocalGit, paths []string, ownersFile string) error {
 	origFiles := map[string][]byte{}
 	for _, file := range paths {
-		if strings.Contains(file, "OWNERS_ALIASES") {
+		switch {
+		case strings.Contains(file, "OWNERS_ALIASES"):
 			origFiles[file] = ownerAliasesFiles[ownersFile]
-		} else if strings.Contains(file, "OWNERS") {
+		case strings.Contains(file, "OWNERS"):
 			origFiles[file] = ownerFiles[ownersFile]
-		} else {
+		default:
 			origFiles[file] = []byte("foo")
 		}
 	}
@@ -676,7 +677,7 @@ func testParseOwnersFile(clients localgit.Clients, t *testing.T) {
 }
 
 func makePatch(b []byte) string {
-	p := bytes.Replace(b, []byte{'\n'}, []byte{'\n', '+'}, -1)
+	p := bytes.ReplaceAll(b, []byte{'\n'}, []byte{'\n', '+'})
 	nbLines := bytes.Count(p, []byte{'+'}) + 1
 	return fmt.Sprintf("@@ -0,0 +1,%d @@\n+%s", nbLines, p)
 }
@@ -1040,6 +1041,9 @@ func testNonCollaborators(clients localgit.Clients, t *testing.T) {
 	if err := lg.MakeFakeRepo("org", "repo"); err != nil {
 		t.Fatalf("Making fake repo: %v", err)
 	}
+
+	vendorPathExpr := regexp.MustCompile("vendor/.*/.*$")
+
 	for i, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			pr := i + 1
@@ -1099,13 +1103,7 @@ func testNonCollaborators(clients localgit.Clients, t *testing.T) {
 
 			froc := makeFakeRepoOwnersClient()
 			if !test.includeVendorOwners {
-				var ignorePatterns []*regexp.Regexp
-				re, err := regexp.Compile("vendor/.*/.*$")
-				if err != nil {
-					t.Fatalf("error compiling regex: %v", err)
-				}
-				ignorePatterns = append(ignorePatterns, re)
-				froc.foc.dirIgnorelist = ignorePatterns
+				froc.foc.dirIgnorelist = []*regexp.Regexp{vendorPathExpr}
 			}
 
 			prInfo := info{

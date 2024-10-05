@@ -112,7 +112,7 @@ func runCmdInDir(dir string, additionalEnv []string, cmd string, args ...string)
 	var allOut string
 	for scanner.Scan() {
 		out := scanner.Text()
-		allOut = allOut + out
+		allOut += out
 		logrus.WithField("cmd", command.Args).Info(out)
 	}
 	allErr, _ := io.ReadAll(stdErr)
@@ -365,8 +365,7 @@ func main() {
 
 	// This is used for testing images building, let's make sure it does something.
 	if targetImagesCount == 0 {
-		logrus.Error("There is no image to build.")
-		os.Exit(1)
+		logrus.Fatal("There is no image to build.")
 	}
 
 	go func(ctx context.Context, wg *sync.WaitGroup, doneChan chan imageDef) {
@@ -387,8 +386,7 @@ func main() {
 	for {
 		select {
 		case err := <-errChan:
-			logrus.WithError(err).Error("Failed.")
-			os.Exit(1)
+			logrus.WithError(err).Fatal("Failed.")
 		default:
 			return
 		}

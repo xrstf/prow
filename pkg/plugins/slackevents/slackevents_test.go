@@ -184,14 +184,14 @@ func TestPush(t *testing.T) {
 		SlackClient: slack.NewFakeClient(),
 	}
 
-	//should not fail if slackClient is nil
+	// should not fail if slackClient is nil
 	for _, tc := range testcases {
 		if err := notifyOnSlackIfManualMerge(pc, tc.pushReq); err != nil {
 			t.Fatalf("Didn't expect error if slack client is nil: %v", err)
 		}
 	}
 
-	//repeat the tests with a fake slack client
+	// repeat the tests with a fake slack client
 	for _, tc := range testcases {
 		slackClient := &FakeClient{
 			SentMessages: make(map[string][]string),

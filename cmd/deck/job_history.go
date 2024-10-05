@@ -218,7 +218,7 @@ func (bucket blobStorageBucket) listSubDirs(ctx context.Context, prefix string) 
 // Lists all keys with given prefix.
 func (bucket blobStorageBucket) listAll(ctx context.Context, prefix string) ([]string, error) {
 	if !strings.HasSuffix(prefix, "/") {
-		prefix = prefix + "/"
+		prefix += "/"
 	}
 	it, err := bucket.Opener.Iterator(ctx, fmt.Sprintf("%s://%s/%s", bucket.storageProvider, bucket.name, prefix), "")
 	if err != nil {
@@ -373,10 +373,8 @@ func getBuildData(ctx context.Context, bucket storageBucket, dir string) (buildD
 	err = readJSON(ctx, bucket, path.Join(dir, prowv1.ProwJobFile), &pj)
 	if err != nil {
 		logrus.WithError(err).Debugf("failed to read %s", prowv1.ProwJobFile)
-	} else {
-		if pj.Spec.Refs != nil {
-			b.Refs = pj.Spec.Refs
-		}
+	} else if pj.Spec.Refs != nil {
+		b.Refs = pj.Spec.Refs
 	}
 
 	if commitHash, err := getPullCommitHash(started.Pull); err == nil {

@@ -639,7 +639,7 @@ func (s *Server) getPatch(org, repo, targetBranch string, num int) (string, erro
 }
 
 func normalize(input string) string {
-	return strings.Replace(input, "/", "-", -1)
+	return strings.ReplaceAll(input, "/", "-")
 }
 
 // releaseNoteNoteFromParentPR gets the release note from the

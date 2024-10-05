@@ -319,7 +319,9 @@ func (sc *statusController) expectedStatus(log *logrus.Entry, queryMap *config.Q
 			if diffCount == 0 {
 				hasFulfilledQuery = true
 				break
-			} else if sc.config().Tide.DisplayAllQueriesInStatus {
+			}
+
+			if sc.config().Tide.DisplayAllQueriesInStatus {
 				if diffCount >= 2000 {
 					// Query is for wrong branch
 					continue
@@ -624,7 +626,7 @@ func (sc *statusController) search() []CodeReviewCommon {
 	orgs := sets.KeySet[string](orgExceptions)
 	queries := openPRsQueries(sets.List(orgs), sets.List(repos), orgExceptions)
 	if !sc.usesGitHubAppsAuth {
-		//The queries for each org need to have their order maintained, otherwise it may be falsely flagged for changing
+		// The queries for each org need to have their order maintained, otherwise it may be falsely flagged for changing
 		var orgs []string
 		for org := range queries {
 			orgs = append(orgs, org)

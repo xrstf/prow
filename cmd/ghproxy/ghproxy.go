@@ -201,11 +201,13 @@ func main() {
 func proxy(o *options, upstreamTransport http.RoundTripper, diskCachePruneInterval time.Duration) http.Handler {
 	var cache http.RoundTripper
 	throttlingTimes := ghcache.NewRequestThrottlingTimes(o.requestThrottlingTime, o.requestThrottlingTimeV4, o.requestThrottlingTimeForGET, o.requestThrottlingMaxDelayTime, o.requestThrottlingMaxDelayTimeV4)
-	if o.redisAddress != "" {
+
+	switch {
+	case o.redisAddress != "":
 		cache = ghcache.NewRedisCache(apptokenequalizer.New(upstreamTransport), o.redisAddress, o.maxConcurrency, throttlingTimes)
-	} else if o.dir == "" {
+	case o.dir == "":
 		cache = ghcache.NewMemCache(apptokenequalizer.New(upstreamTransport), o.maxConcurrency, throttlingTimes)
-	} else {
+	default:
 		cache = ghcache.NewDiskCache(apptokenequalizer.New(upstreamTransport), o.dir, o.sizeGB, o.maxConcurrency, o.diskCacheDisableAuthHeaderPartitioning, diskCachePruneInterval, throttlingTimes)
 		go diskMonitor(o.pushGatewayInterval, o.dir)
 	}

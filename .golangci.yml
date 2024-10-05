@@ -21,6 +21,7 @@ linters:
     - copyloopvar
     - durationcheck
     - errorlint
+    - gocritic
     - gosimple
     - govet
     - ineffassign
@@ -30,6 +31,8 @@ linters:
   disable-all: true
 
 issues:
+  exclude:
+  - singleCaseSwitch # in most cases this is the beginning of a lookup table and should be kept an obvious table
   exclude-rules:
   - linters:
     - staticcheck

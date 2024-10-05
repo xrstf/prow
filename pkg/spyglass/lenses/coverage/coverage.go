@@ -87,13 +87,14 @@ func (lens Lens) Body(artifacts []api.Artifact, resourceDir string, data string,
 		if len(artifacts) > 2 {
 			return "Too many files - expected one coverage file and one optional HTML file"
 		}
-		if strings.HasSuffix(artifacts[0].JobPath(), ".html") {
+		switch {
+		case strings.HasSuffix(artifacts[0].JobPath(), ".html"):
 			htmlArtifact = artifacts[0]
 			profileArtifact = artifacts[1]
-		} else if strings.HasSuffix(artifacts[1].JobPath(), ".html") {
+		case strings.HasSuffix(artifacts[1].JobPath(), ".html"):
 			htmlArtifact = artifacts[1]
 			profileArtifact = artifacts[0]
-		} else {
+		default:
 			return "Multiple input files, but none had a .html extension."
 		}
 	}

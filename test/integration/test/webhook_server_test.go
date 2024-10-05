@@ -62,12 +62,12 @@ func TestWebhookServerValidateCluster(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not find absolute file path")
 	}
-	//prowjob should fail and produce error
+	// prowjob should fail and produce error
 	out, err := exec.Command("kubectl", "--context="+getClusterContext(), "apply", "-f", absInvalidProwJobPath).CombinedOutput()
 	if err == nil {
 		t.Fatalf("prowjob was not properly validated. Output: %s", string(out))
 	}
-	//prowjob should be created successfully
+	// prowjob should be created successfully
 	out, err = exec.Command("kubectl", "--context="+getClusterContext(), "apply", "-f", absValidProwJobPath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("prowjob was not properly validated. Error: %v Output: %s", err, string(out))
@@ -87,7 +87,7 @@ func TestWebhookServerMutateProwjob(t *testing.T) {
 		t.Fatalf("could not find absolute file path")
 	}
 	var mutatedProwJob v1.ProwJob
-	//prowjob should be created successfully
+	// prowjob should be created successfully
 	out, err := exec.Command("kubectl", "--context="+getClusterContext(), "apply", "-f", absValidBareProwJobPath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("prowjob was not properly validated. Error: %v Output: %s", err, string(out))

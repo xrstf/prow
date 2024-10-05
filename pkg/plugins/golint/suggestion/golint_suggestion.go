@@ -65,7 +65,7 @@ func fixNameUnderscore(p lint.Problem, matches []string) string {
 	}
 	underscoreRe := regexp.MustCompile(`[A-Za-z]+(_[A-Za-z0-9]+)+`)
 	namesWithUnderscore := underscoreRe.FindStringSubmatch(matches[1])
-	suggestion := strings.Replace(p.LineText, namesWithUnderscore[0], matches[2], -1)
+	suggestion := strings.ReplaceAll(p.LineText, namesWithUnderscore[0], matches[2])
 	return suggestion
 }
 
@@ -77,7 +77,7 @@ func fixNameAllCaps(p lint.Problem, matches []string) string {
 	// Identify all caps names
 	reAllCaps := regexp.MustCompile(`[A-Z]+(_[A-Z0-9]+)*`)
 	result = reAllCaps.ReplaceAllStringFunc(p.LineText, func(oldName string) string {
-		return strings.Replace(cases.Title(language.English).String(strings.Replace(strings.ToLower(oldName), "_", " ", -1)), " ", "", -1)
+		return strings.ReplaceAll(cases.Title(language.English).String(strings.ReplaceAll(strings.ToLower(oldName), "_", " ")), " ", "")
 	})
 	return result
 }
@@ -86,7 +86,7 @@ func fixStutter(p lint.Problem, matches []string) string {
 	if len(matches) < 3 {
 		return ""
 	}
-	suggestion := strings.Replace(p.LineText, matches[1], matches[2], -1)
+	suggestion := strings.ReplaceAll(p.LineText, matches[1], matches[2])
 	return suggestion
 }
 
@@ -119,7 +119,7 @@ func fixErrorf(p lint.Problem, matches []string) string {
 	}
 	toReplace := fmt.Sprintf("errors.New(fmt.Sprintf(%s))", parameterText)
 	replacement := fmt.Sprintf("fmt.Errorf(%s)", parameterText)
-	suggestion := strings.Replace(p.LineText, toReplace, replacement, -1)
+	suggestion := strings.ReplaceAll(p.LineText, toReplace, replacement)
 	return suggestion
 }
 
@@ -132,7 +132,7 @@ func fixRanges(p lint.Problem, matches []string) string {
 	if len(valuesToOmit) == 0 {
 		return ""
 	}
-	suggestion := strings.Replace(p.LineText, valuesToOmit[0], matches[1], -1)
+	suggestion := strings.ReplaceAll(p.LineText, valuesToOmit[0], matches[1])
 	return suggestion
 }
 
@@ -140,7 +140,7 @@ func fixVarDecl(p lint.Problem, matches []string) string {
 	if len(matches) != 2 {
 		return ""
 	}
-	suggestion := strings.Replace(p.LineText, " "+matches[1], "", -1)
+	suggestion := strings.ReplaceAll(p.LineText, " "+matches[1], "")
 	return suggestion
 }
 

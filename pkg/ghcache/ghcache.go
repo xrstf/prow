@@ -241,7 +241,8 @@ func (tr *tokensRegistry) calculateRequestWaitDuration(lastRequest tokenInfo, to
 	}
 	duration := toQueue.Sub(lastRequest.timestamp)
 
-	if toQueue.Before(lastRequest.timestamp) || toQueue.Equal(lastRequest.timestamp) {
+	switch {
+	case toQueue.Before(lastRequest.timestamp) || toQueue.Equal(lastRequest.timestamp):
 		// There is already queued request, queue next afterwards.
 		difference := throttlingTime
 		if getReq {
@@ -256,10 +257,10 @@ func (tr *tokensRegistry) calculateRequestWaitDuration(lastRequest tokenInfo, to
 			future = toQueue.Add(tr.maxDelayTime)
 		}
 		toQueue = future
-	} else if duration >= throttlingTime || (getReq && duration >= tr.throttlingTimeForGET) {
+	case duration >= throttlingTime || (getReq && duration >= tr.throttlingTimeForGET):
 		// There was no request for some time, no need to wait.
 		duration = 0
-	} else {
+	default:
 		// There is a queued request, wait until the next throttling tick.
 		difference := throttlingTime - duration
 		if getReq && !lastRequest.getReq {

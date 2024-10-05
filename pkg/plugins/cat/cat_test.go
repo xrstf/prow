@@ -352,11 +352,12 @@ Available variants:
 	for _, testcase := range testcases {
 		fakemeow := &realClowder{url: ts.URL + testcase.path}
 		cat, err := fakemeow.readCat(*category, *movieCat, "")
-		if testcase.valid && err != nil {
+		switch {
+		case testcase.valid && err != nil:
 			t.Errorf("For case %s, didn't expect error: %v", testcase.name, err)
-		} else if !testcase.valid && err == nil {
+		case !testcase.valid && err == nil:
 			t.Errorf("For case %s, expected error, received cat: %s", testcase.name, cat)
-		} else if testcase.valid && cat == "" {
+		case testcase.valid && cat == "":
 			t.Errorf("For case %s, got an empty cat", testcase.name)
 		}
 	}
@@ -479,9 +480,10 @@ func TestCats(t *testing.T) {
 			t.Errorf("%s: expected an error to occur", tc.name)
 			continue
 		}
-		if tc.shouldComment && len(fc.IssueComments[5]) != 1 {
+		switch {
+		case tc.shouldComment && len(fc.IssueComments[5]) != 1:
 			t.Errorf("%s: should have commented.", tc.name)
-		} else if tc.shouldComment {
+		case tc.shouldComment:
 			shouldImage := !tc.shouldError
 			body := fc.IssueComments[5][0].Body
 			hasImage := strings.Contains(body, "![")
@@ -490,7 +492,7 @@ func TestCats(t *testing.T) {
 			} else if !hasImage && shouldImage {
 				t.Errorf("%s: no image in %s", tc.name, body)
 			}
-		} else if !tc.shouldComment && len(fc.IssueComments[5]) != 0 {
+		case !tc.shouldComment && len(fc.IssueComments[5]) != 0:
 			t.Errorf("%s: should not have commented.", tc.name)
 		}
 	}

@@ -178,14 +178,15 @@ func TestReconcile(t *testing.T) {
 				})
 			_, err := r.Reconcile(context.TODO(), tc.request)
 
-			if tc.wantError != nil && err != nil {
+			switch {
+			case tc.wantError != nil && err != nil:
 				if tc.wantError.Error() != err.Error() {
 					t.Errorf("Expected error %s but got %s", tc.wantError, err)
 				}
 				return
-			} else if tc.wantError != nil && err == nil {
+			case tc.wantError != nil && err == nil:
 				t.Fatalf("Expected error %s but got nil", tc.wantError)
-			} else if tc.wantError == nil && err != nil {
+			case tc.wantError == nil && err != nil:
 				t.Fatalf("Expected error nil but got %v", err)
 			}
 

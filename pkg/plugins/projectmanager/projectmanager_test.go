@@ -734,7 +734,7 @@ func checkCards(expectedColumnCards, projectColumnCards map[int][]github.Project
 	for columnID, expectedCards := range expectedColumnCards {
 		projectCards := projectColumnCards[columnID]
 
-		//make sure all expectedCard are in projectCards
+		// make sure all expectedCard are in projectCards
 		if len(expectedCards) > len(projectCards) {
 			return fmt.Errorf("Not all expected cards can be found for column: %d, \nexpected: %v\n found: %v", columnID, expectedCards, projectCards)
 		}

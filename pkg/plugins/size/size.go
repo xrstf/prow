@@ -212,15 +212,16 @@ func (s size) label() string {
 }
 
 func bucket(lineCount int, sizes plugins.Size) size {
-	if lineCount < sizes.S {
+	switch {
+	case lineCount < sizes.S:
 		return sizeXS
-	} else if lineCount < sizes.M {
+	case lineCount < sizes.M:
 		return sizeS
-	} else if lineCount < sizes.L {
+	case lineCount < sizes.L:
 		return sizeM
-	} else if lineCount < sizes.Xl {
+	case lineCount < sizes.Xl:
 		return sizeL
-	} else if lineCount < sizes.Xxl {
+	case lineCount < sizes.Xxl:
 		return sizeXL
 	}
 

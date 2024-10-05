@@ -130,13 +130,14 @@ func TestAll(t *testing.T) {
 			IsPR:       tc.pr,
 		}
 		err := handle(fc, logrus.WithField("plugin", pluginName), e, &fakeSnicker{tc.readImgErr})
-		if !tc.shouldError && err != nil {
+		switch {
+		case !tc.shouldError && err != nil:
 			t.Errorf("%s: didn't expect error: %v", tc.name, err)
-		} else if tc.shouldError && err == nil {
+		case tc.shouldError && err == nil:
 			t.Errorf("%s: expected an error to occur", tc.name)
-		} else if tc.shouldComment && len(fc.IssueComments[5]) != 1 {
+		case tc.shouldComment && len(fc.IssueComments[5]) != 1:
 			t.Errorf("%s: should have commented.", tc.name)
-		} else if tc.shouldComment {
+		case tc.shouldComment:
 			shouldImage := !tc.shouldError
 			body := fc.IssueComments[5][0].Body
 			hasImage := strings.Contains(body, "![")
@@ -145,7 +146,7 @@ func TestAll(t *testing.T) {
 			} else if !hasImage && shouldImage {
 				t.Errorf("%s: no image in %s", tc.name, body)
 			}
-		} else if !tc.shouldComment && len(fc.IssueComments[5]) != 0 {
+		case !tc.shouldComment && len(fc.IssueComments[5]) != 0:
 			t.Errorf("%s: should not have commented.", tc.name)
 		}
 	}

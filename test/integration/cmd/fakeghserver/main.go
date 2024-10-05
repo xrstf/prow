@@ -62,7 +62,7 @@ func main() {
 
 	r := mux.NewRouter()
 	// So far, supports APIs used by crier:
-	//type GitHubClient interface {
+	// type GitHubClient interface {
 	// 	BotName() (string, error) # /user
 	// 	CreateStatus(org, repo, ref string, s github.Status) error # fmt.Sprintf("/repos/%s/%s/statuses/%s", org, repo, SHA)
 	// 	ListIssueComments(org, repo string, number int) ([]github.IssueComment, error) # fmt.Sprintf("/repos/%s/%s/issues/%d/comments", org, repo, number)

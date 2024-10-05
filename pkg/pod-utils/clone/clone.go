@@ -138,13 +138,14 @@ func censorToken(msg, token string) string {
 // refs should be cloned
 func PathForRefs(baseDir string, refs prowapi.Refs) string {
 	var clonePath string
-	if refs.PathAlias != "" {
+	switch {
+	case refs.PathAlias != "":
 		clonePath = refs.PathAlias
-	} else if refs.RepoLink != "" {
+	case refs.RepoLink != "":
 		// Drop the protocol from the RepoLink
 		parts := strings.Split(refs.RepoLink, "://")
 		clonePath = parts[len(parts)-1]
-	} else {
+	default:
 		clonePath = fmt.Sprintf("github.com/%s/%s", refs.Org, refs.Repo)
 	}
 	return path.Join(baseDir, "src", clonePath)

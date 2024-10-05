@@ -43,8 +43,8 @@ func (f *fakeGHClient) ListIssueComments(_, _ string, _ int) ([]github.IssueComm
 	return f.comments, nil
 }
 
-func (f *fakeGHClient) DeleteComment(_, _ string, ID int) error {
-	f.deletedComments = append(f.deletedComments, ID)
+func (f *fakeGHClient) DeleteComment(_, _ string, id int) error {
+	f.deletedComments = append(f.deletedComments, id)
 	return nil
 }
 

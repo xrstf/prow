@@ -451,7 +451,8 @@ func (r *reconciler) syncPendingJob(ctx context.Context, pj *prowv1.ProwJob) (*r
 		return nil, err
 	}
 
-	if !podExists {
+	switch {
+	case !podExists:
 		// Pod is missing. This can happen in case the previous pod was deleted manually or by
 		// a rescheduler. Start a new pod.
 		id, pn, err := r.startPod(ctx, pj)
@@ -468,7 +469,8 @@ func (r *reconciler) syncPendingJob(ctx context.Context, pj *prowv1.ProwJob) (*r
 			pj.Status.PodName = pn
 			r.log.WithFields(pjutil.ProwJobFields(pj)).Info("Pod is missing, starting a new pod")
 		}
-	} else if pod.Status.Reason == Evicted {
+
+	case pod.Status.Reason == Evicted:
 		// Pod was evicted.
 		if pj.Spec.ErrorOnEviction {
 			// ErrorOnEviction is enabled, complete the PJ and mark it as
@@ -496,7 +498,8 @@ func (r *reconciler) syncPendingJob(ctx context.Context, pj *prowv1.ProwJob) (*r
 			r.log.WithField("name", pj.ObjectMeta.Name).Debug("Delete Pod.")
 			return nil, ctrlruntimeclient.IgnoreNotFound(client.Delete(ctx, pod))
 		}
-	} else if pod.DeletionTimestamp != nil && pod.Status.Reason == NodeUnreachablePodReason {
+
+	case pod.DeletionTimestamp != nil && pod.Status.Reason == NodeUnreachablePodReason:
 		// This can happen in any phase and means the node got evicted after it became unresponsive. Delete the finalizer so the pod
 		// vanishes and we will silently re-create it in the next iteration.
 		r.log.WithFields(pjutil.ProwJobFields(pj)).Info("Pods Node got lost, deleting & next sync loop will restart pod")
@@ -515,7 +518,8 @@ func (r *reconciler) syncPendingJob(ctx context.Context, pj *prowv1.ProwJob) (*r
 		}
 
 		return nil, nil
-	} else {
+
+	default:
 		switch pod.Status.Phase {
 		case corev1.PodUnknown:
 			// Pod is in Unknown state. This can happen if there is a problem with

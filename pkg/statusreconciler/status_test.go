@@ -281,9 +281,9 @@ func getPresubmits(names []string) []config.Presubmit {
 	return presubmits
 }
 
-func verify(t *testing.T, testCase string, config config.Config, Namespace string, presubmits []string) {
-	if config.ProwConfig.ProwJobNamespace != Namespace {
-		t.Errorf("%s: expected namespace %s, got %s", testCase, Namespace, config.ProwConfig.ProwJobNamespace)
+func verify(t *testing.T, testCase string, config config.Config, namespace string, presubmits []string) {
+	if config.ProwConfig.ProwJobNamespace != namespace {
+		t.Errorf("%s: expected namespace %s, got %s", testCase, namespace, config.ProwConfig.ProwJobNamespace)
 	}
 	var names []string
 	for _, ps := range config.JobConfig.PresubmitsStatic["org/repo"] {
