@@ -27,6 +27,7 @@ linters:
     - ineffassign
     - intrange
     - misspell
+    - nolintlint
     - staticcheck
     - unused
   disable-all: true
