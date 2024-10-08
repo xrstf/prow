@@ -141,7 +141,7 @@ func (gr gooseResult) Format() (string, error) {
 func (g *realGaggle) URL() string {
 	g.lock.RLock()
 	defer g.lock.RUnlock()
-	uri := string(g.url)
+	uri := g.url
 	if g.key != "" {
 		uri += "&client_id=" + url.QueryEscape(g.key)
 	}

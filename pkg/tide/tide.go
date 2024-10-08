@@ -450,7 +450,7 @@ func setupSyncControllerIndexes(ctx context.Context, indexer ctrlruntimeclient.F
 }
 
 func prKey(pr *CodeReviewCommon) string {
-	return fmt.Sprintf("%s#%d", string(pr.NameWithOwner), pr.Number)
+	return fmt.Sprintf("%s#%d", pr.NameWithOwner, pr.Number)
 }
 
 // newExpectedContext creates a Context with Expected state.
@@ -648,7 +648,7 @@ func (c *syncController) initSubpoolData(sp *subpool) error {
 
 	sp.cc = make(map[int]contextChecker, len(sp.prs))
 	for _, pr := range sp.prs {
-		sp.cc[pr.Number], err = c.provider.GetTideContextPolicy(sp.org, sp.repo, sp.branch, refGetterFactory(string(sp.sha)), &pr)
+		sp.cc[pr.Number], err = c.provider.GetTideContextPolicy(sp.org, sp.repo, sp.branch, refGetterFactory(sp.sha), &pr)
 		if err != nil {
 			return fmt.Errorf("error setting up context checker for pr %d: %w", pr.Number, err)
 		}
@@ -1217,10 +1217,10 @@ func (c *syncController) isRetestEligible(log *logrus.Entry, candidate *CodeRevi
 		pjLabels := make(map[string]string)
 		pjLabels[kube.CreatedByTideLabel] = "true"
 		pjLabels[kube.ProwJobTypeLabel] = string(prowapi.PresubmitJob)
-		pjLabels[kube.OrgLabel] = string(candidate.Org)
-		pjLabels[kube.RepoLabel] = string(candidate.Repo)
-		pjLabels[kube.BaseRefLabel] = string(candidate.BaseRefName)
-		pjLabels[kube.PullLabel] = string(strconv.Itoa(int(candidate.Number)))
+		pjLabels[kube.OrgLabel] = candidate.Org
+		pjLabels[kube.RepoLabel] = candidate.Repo
+		pjLabels[kube.BaseRefLabel] = candidate.BaseRefName
+		pjLabels[kube.PullLabel] = strconv.Itoa(candidate.Number)
 		pjLabels[kube.ContextAnnotation] = string(headContext.Context)
 
 		var pjs prowapi.ProwJobList
@@ -1233,7 +1233,7 @@ func (c *syncController) isRetestEligible(log *logrus.Entry, candidate *CodeRevi
 			return false
 		}
 
-		if prowJobListHasProwJobWithMatchingHeadSHA(&pjs, string(candidate.HeadRefOID)) {
+		if prowJobListHasProwJobWithMatchingHeadSHA(&pjs, candidate.HeadRefOID) {
 			continue
 		}
 
@@ -1370,10 +1370,10 @@ func (c *syncController) trigger(sp subpool, presubmits []config.Presubmit, prs 
 	triggeredContexts := sets.New[string]()
 	enableScheduling := c.config().Scheduler.Enabled
 	for _, ps := range presubmits {
-		if triggeredContexts.Has(string(ps.Context)) {
+		if triggeredContexts.Has(ps.Context) {
 			continue
 		}
-		triggeredContexts.Insert(string(ps.Context))
+		triggeredContexts.Insert(ps.Context)
 		var spec prowapi.ProwJobSpec
 		if len(prs) == 1 {
 			spec = pjutil.PresubmitSpec(ps, refs)
@@ -1733,17 +1733,17 @@ func prMeta(prs ...CodeReviewCommon) []prowapi.Pull {
 
 func sortPools(pools []Pool) {
 	sort.Slice(pools, func(i, j int) bool {
-		if string(pools[i].Org) != string(pools[j].Org) {
-			return string(pools[i].Org) < string(pools[j].Org)
+		if pools[i].Org != pools[j].Org {
+			return pools[i].Org < pools[j].Org
 		}
-		if string(pools[i].Repo) != string(pools[j].Repo) {
-			return string(pools[i].Repo) < string(pools[j].Repo)
+		if pools[i].Repo != pools[j].Repo {
+			return pools[i].Repo < pools[j].Repo
 		}
-		return string(pools[i].Branch) < string(pools[j].Branch)
+		return pools[i].Branch < pools[j].Branch
 	})
 
 	sortPRs := func(prs []CodeReviewCommon) {
-		sort.Slice(prs, func(i, j int) bool { return int(prs[i].Number) < int(prs[j].Number) })
+		sort.Slice(prs, func(i, j int) bool { return prs[i].Number < prs[j].Number })
 	}
 	for i := range pools {
 		sortPRs(pools[i].SuccessPRs)
@@ -2209,10 +2209,10 @@ func pickBatchWithPreexistingTests(sp subpool, candidates []CodeReviewCommon, ma
 
 func isPullInPRList(pull prowapi.Pull, allPRs []CodeReviewCommon) bool {
 	for _, pullRequest := range allPRs {
-		if pull.Number != int(pullRequest.Number) {
+		if pull.Number != pullRequest.Number {
 			continue
 		}
-		return pull.SHA == string(pullRequest.HeadRefOID)
+		return pull.SHA == pullRequest.HeadRefOID
 	}
 
 	return false

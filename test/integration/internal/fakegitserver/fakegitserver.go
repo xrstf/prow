@@ -115,7 +115,7 @@ func GitCGIHandler(gitBinary, gitReposParentDir string) http.Handler {
 		}
 		// Remove the "/repo" prefix, because git-http-backend expects the
 		// request to simply be the Git repo name.
-		req.URL.Path = strings.TrimPrefix(string(req.URL.Path), "/repo")
+		req.URL.Path = strings.TrimPrefix(req.URL.Path, "/repo")
 		// It appears that this RequestURI field is not used; but for
 		// completeness trim the prefix here as well.
 		req.RequestURI = strings.TrimPrefix(req.RequestURI, "/repo")

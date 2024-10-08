@@ -480,7 +480,7 @@ func (cm *CommentMap) EncodeYaml(config interface{}, encoder *yaml3.Encoder) err
 	}
 
 	node := yaml3.Node{}
-	err = yaml3.Unmarshal([]byte(y1), &node)
+	err = yaml3.Unmarshal(y1, &node)
 	if err != nil {
 		return errors.New("failed to unmarshal yaml to yaml node")
 	}

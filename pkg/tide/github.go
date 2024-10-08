@@ -418,7 +418,7 @@ func (gi *GitHubProvider) refsForJob(sp subpool, prs []CodeReviewCommon) (prowap
 			prowapi.Pull{
 				Number:  pr.Number,
 				Title:   pr.Title,
-				Author:  string(pr.AuthorLogin),
+				Author:  pr.AuthorLogin,
 				SHA:     pr.HeadRefOID,
 				HeadRef: pr.HeadRefName,
 			},

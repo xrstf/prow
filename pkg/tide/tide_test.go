@@ -74,7 +74,7 @@ func testPullsMatchList(t *testing.T, test string, actual []CodeReviewCommon, ex
 	}
 	for _, pr := range actual {
 		var found bool
-		n1 := int(pr.Number)
+		n1 := pr.Number
 		for _, n2 := range expected {
 			if n1 == n2 {
 				found = true
@@ -1181,7 +1181,7 @@ func testPickBatch(clients localgit.Clients, t *testing.T) {
 	for _, testpr := range testprs {
 		var found bool
 		for _, pr := range prs {
-			if int(pr.Number) == testpr.number {
+			if pr.Number == testpr.number {
 				found = true
 				break
 			}
@@ -3867,8 +3867,8 @@ func TestPresubmitsForBatch(t *testing.T) {
 					key := changeCacheKey{
 						org:    pr.Org,
 						repo:   pr.Repo,
-						number: int(pr.Number),
-						sha:    string(pr.HeadRefOID),
+						number: pr.Number,
+						sha:    pr.HeadRefOID,
 					}
 					tc.changedFiles.changeCache[key] = []string{}
 				}
@@ -4408,8 +4408,8 @@ func TestPickSmallestPassingNumber(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, got := pickHighestPriorityPR(nil, tc.prs, nil, alwaysTrue, priorities)
-			if int(got.Number) != tc.expected {
-				t.Errorf("got %d, expected %d", int(got.Number), tc.expected)
+			if got.Number != tc.expected {
+				t.Errorf("got %d, expected %d", got.Number, tc.expected)
 			}
 		})
 	}
@@ -4737,10 +4737,10 @@ func TestPickBatchPrefersBatchesWithPreexistingJobs(t *testing.T) {
 			contextCheckers := make(map[int]contextChecker, len(sp.prs))
 			for _, pr := range sp.prs {
 				cc := &config.TideContextPolicy{}
-				if tc.prsFailingContextCheck.Has(int(pr.Number)) {
+				if tc.prsFailingContextCheck.Has(pr.Number) {
 					cc.RequiredContexts = []string{"guaranteed-absent"}
 				}
-				contextCheckers[int(pr.Number)] = cc
+				contextCheckers[pr.Number] = cc
 			}
 
 			newBatchFunc := func(sp subpool, candidates []CodeReviewCommon, maxBatchSize int) ([]CodeReviewCommon, error) {
