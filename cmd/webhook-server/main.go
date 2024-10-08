@@ -32,7 +32,6 @@ import (
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/prow/cmd/webhook-server/secretmanager"
 	"sigs.k8s.io/prow/pkg/config"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -81,7 +80,7 @@ type webhookAgent struct {
 }
 
 func (o *options) DefaultAndValidate() error {
-	optionGroup := []flagutil.OptionGroup{&o.kubernetes, &o.config, &o.storage}
+	optionGroup := []prowflagutil.OptionGroup{&o.kubernetes, &o.config, &o.storage}
 	if err := optionGroup[0].Validate(o.dryRun); err != nil {
 		return err
 	}
@@ -112,7 +111,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Whether to mutate any real-world state")
 	fs.IntVar(&o.time, "time", 1, "duration in minutes to fetch build clusters")
 	fs.Var(&o.dnsNames, "dns", "DNS Names CA-Cert config")
-	optionGroups := []flagutil.OptionGroup{&o.kubernetes, &o.config}
+	optionGroups := []prowflagutil.OptionGroup{&o.kubernetes, &o.config}
 	for _, optionGroup := range optionGroups {
 		optionGroup.AddFlags(fs)
 	}

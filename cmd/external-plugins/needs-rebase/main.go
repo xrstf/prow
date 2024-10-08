@@ -28,7 +28,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/prow/cmd/external-plugins/needs-rebase/plugin"
 	"sigs.k8s.io/prow/pkg/config/secret"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	pluginsflagutil "sigs.k8s.io/prow/pkg/flagutil/plugins"
 	"sigs.k8s.io/prow/pkg/github"
@@ -58,7 +57,7 @@ type options struct {
 const defaultHourlyTokens = 360
 
 func (o *options) Validate() error {
-	for idx, group := range []flagutil.OptionGroup{&o.github} {
+	for idx, group := range []prowflagutil.OptionGroup{&o.github} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return fmt.Errorf("%d: %w", idx, err)
 		}
@@ -80,7 +79,7 @@ func gatherOptions() options {
 	o.github.AddCustomizedFlags(fs, prowflagutil.ThrottlerDefaults(defaultHourlyTokens, defaultHourlyTokens))
 
 	o.pluginsConfig.PluginConfigPathDefault = "/etc/plugins/plugins.yaml"
-	for _, group := range []flagutil.OptionGroup{&o.instrumentationOptions, &o.pluginsConfig} {
+	for _, group := range []prowflagutil.OptionGroup{&o.instrumentationOptions, &o.pluginsConfig} {
 		group.AddFlags(fs)
 	}
 	fs.Parse(os.Args[1:])

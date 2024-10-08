@@ -35,7 +35,6 @@ import (
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/gerrit/adapter"
@@ -104,7 +103,7 @@ func (o *options) validate() error {
 		logrus.Info("--cookiefile is not set, using anonymous authentication")
 	}
 
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
@@ -136,7 +135,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.DurationVar(&o.pushGatewayInterval, "push-gateway-interval", time.Minute, "Interval at which prometheus metrics for disk space are pushed.")
 	// TODO(cjwagner): remove deprecated flag.
 	fs.UintVar(&o.instanceConcurrencyLimit, "instance-concurrency-limit", 5, "[DEPRECATED] Number of concurrent calls that can be made to any single Gerrit host instance simultaneously.")
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
 		group.AddFlags(fs)
 	}
 	fs.Parse(args)

@@ -37,7 +37,6 @@ import (
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 	"sigs.k8s.io/prow/pkg/scheduler"
 
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -74,7 +73,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.Var(&o.enabledControllers, "enable-controller", fmt.Sprintf("Controllers to enable. Can be passed multiple times. Defaults to controllers: %s", plank.ControllerName))
 
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Whether or not to make mutating API calls to GitHub.")
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config, &o.storage} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config, &o.storage} {
 		group.AddFlags(fs)
 	}
 
@@ -86,7 +85,7 @@ func (o *options) Validate() error {
 	o.github.AllowAnonymous = true
 
 	var errs []error
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config, &o.storage} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config, &o.storage} {
 		if err := group.Validate(o.dryRun); err != nil {
 			errs = append(errs, err)
 		}

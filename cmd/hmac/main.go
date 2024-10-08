@@ -37,7 +37,6 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"sigs.k8s.io/prow/pkg/config"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/ghhook"
@@ -60,7 +59,7 @@ type options struct {
 }
 
 func (o *options) validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.config} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}

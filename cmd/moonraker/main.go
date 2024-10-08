@@ -37,7 +37,6 @@ import (
 
 	"sigs.k8s.io/prow/pkg/config"
 	"sigs.k8s.io/prow/pkg/diskutil"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -106,7 +105,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.DurationVar(&o.gracePeriod, "grace-period", 25*time.Second, "On shutdown, try to handle remaining events for the specified duration. Cannot be larger than 30s.")
 	fs.StringVar(&o.cookiefilePath, "cookiefile", "", "Path to git http.cookiefile, leave empty for github or anonymous")
 	fs.DurationVar(&o.pushGatewayInterval, "push-gateway-interval", time.Minute, "Interval at which prometheus metrics for disk space are pushed.")
-	for _, group := range []flagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
 		group.AddFlags(fs)
 	}
 
@@ -117,7 +116,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 
 func (o *options) validate() error {
 	var errs []error
-	for _, group := range []flagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
 		if err := group.Validate(o.dryRun); err != nil {
 			errs = append(errs, err)
 		}

@@ -26,7 +26,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	fakectrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	prowapi "sigs.k8s.io/prow/pkg/apis/prowjobs/v1"
@@ -462,12 +461,12 @@ func TestFlags(t *testing.T) {
 }
 
 type createTrackingClient struct {
-	ctrlruntimeclient.Client
+	client.Client
 	sawCreate bool
-	created   []ctrlruntimeclient.Object
+	created   []client.Object
 }
 
-func (ct *createTrackingClient) Create(ctx context.Context, obj ctrlruntimeclient.Object, opts ...ctrlruntimeclient.CreateOption) error {
+func (ct *createTrackingClient) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
 	ct.sawCreate = true
 	ct.created = append(ct.created, obj)
 	return ct.Client.Create(ctx, obj, opts...)
@@ -476,6 +475,6 @@ func (ct *createTrackingClient) Create(ctx context.Context, obj ctrlruntimeclien
 func newCreateTrackingClient(objs []client.Object) *createTrackingClient {
 	return &createTrackingClient{
 		Client:  fakectrlruntimeclient.NewClientBuilder().WithObjects(objs...).Build(),
-		created: make([]ctrlruntimeclient.Object, 0),
+		created: make([]client.Object, 0),
 	}
 }

@@ -26,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	pluginsflagutil "sigs.k8s.io/prow/pkg/flagutil/plugins"
@@ -72,7 +71,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Whether or not to make mutating API calls to GitHub.")
 	o.github.AddCustomizedFlags(fs, prowflagutil.ThrottlerDefaults(defaultTokens, defaultBurst))
 	o.pluginsConfig.PluginConfigPathDefault = "/etc/plugins/plugins.yaml"
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.pluginsConfig} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.pluginsConfig} {
 		group.AddFlags(fs)
 	}
 	fs.Parse(args)
@@ -80,7 +79,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.storage, &o.config, &o.pluginsConfig} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.storage, &o.config, &o.pluginsConfig} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}

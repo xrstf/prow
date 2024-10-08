@@ -14,6 +14,11 @@ linters-settings:
   govet:
     enable:
       - nilness
+  revive:
+    rules:
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#duplicated-imports
+      - name: duplicated-imports
+        severity: warning
 
 linters:
   enable:
@@ -29,6 +34,7 @@ linters:
     - misspell
     - nolintlint
     - nosprintfhostport
+    - revive
     - staticcheck
     - tenv
     - unconvert
