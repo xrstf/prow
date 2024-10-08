@@ -29,6 +29,7 @@ import (
 	"testing"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -8748,8 +8749,9 @@ func TestContextDescriptionWithBaseShaRoundTripping(t *testing.T) {
 			for range 100 {
 				var humanReadable string
 				fuzz.New().Fuzz(&humanReadable)
+
 				contextDescription := ContextDescriptionWithBaseSha(humanReadable, tc.shaIn)
-				if l := len(contextDescription); l > contextDescriptionMaxLen {
+				if l := utf8.RuneCountInString(contextDescription); l > contextDescriptionMaxLen {
 					t.Errorf("Context description %q generated from humanReadable %q and baseSHa %q is longer than %d (%d)", contextDescription, humanReadable, tc.shaIn, contextDescriptionMaxLen, l)
 				}
 

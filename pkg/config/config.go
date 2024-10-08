@@ -36,6 +36,7 @@ import (
 	"sync"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	gitignore "github.com/denormal/go-gitignore"
 	"github.com/google/go-cmp/cmp"
@@ -3379,21 +3380,24 @@ func (pc *ProwConfig) mergeFrom(additional *ProwConfig) error {
 // func. Storing the baseSHA in the status context allows us to store job results pretty much forever,
 // instead of having to rerun everything after sinker cleaned up the ProwJobs.
 func ContextDescriptionWithBaseSha(humanReadable, baseSHA string) string {
-	var suffix string
-	if baseSHA != "" {
-		suffix = contextDescriptionBaseSHADelimiter + baseSHA
-		// Leftpad the baseSHA suffix so its shown at a stable position on the right side in the GitHub UI.
-		// The GitHub UI will also trim it on the right side and replace some part of it with '...'. The
-		// API always returns the full string.
-		if len(humanReadable+suffix) < contextDescriptionMaxLen {
-			for range contextDescriptionMaxLen - len(humanReadable+suffix) {
-				// This looks like a standard space but is U+2001, because GitHub seems to deduplicate normal
-				// spaces in their frontend.
-				suffix = " " + suffix
-			}
-		}
+	if baseSHA == "" {
+		return truncate(humanReadable, contextDescriptionMaxLen)
 	}
-	return truncate(humanReadable, contextDescriptionMaxLen-len(suffix)) + suffix
+
+	// " BaseSHA:yaddayaddayadda"
+	suffix := contextDescriptionBaseSHADelimiter + baseSHA
+
+	// turn "a looooooooong text" into "a lo...g text"
+	humanReadable = truncate(humanReadable, contextDescriptionMaxLen-len(suffix))
+
+	// Leftpad the baseSHA suffix so it's shown at a stable position on the right side in the GitHub UI.
+	// The GitHub UI will also trim it on the right side and replace some part of it with '...'. The
+	// API always returns the full string.
+	gap := contextDescriptionMaxLen - utf8.RuneCountInString(humanReadable) - len(suffix)
+
+	// This looks like a standard space but is U+2001, because GitHub seems to collapse normal
+	// spaces in their frontend.
+	return humanReadable + strings.Repeat(" ", gap) + suffix
 }
 
 // BaseSHAFromContextDescription is used by Tide to decode a baseSHA from a github status context
@@ -3422,10 +3426,11 @@ const (
 // truncate converts "really long messages" into "really ... messages".
 func truncate(in string, maxLen int) string {
 	half := (maxLen - len(elide)) / 2
-	if len(in) <= maxLen {
+	inlen := utf8.RuneCountInString(in)
+	if inlen <= maxLen {
 		return in
 	}
-	return in[:half] + elide + in[len(in)-half:]
+	return in[:half] + elide + in[inlen-half:]
 }
 
 func (pc *ProwConfig) HasConfigFor() (global bool, orgs sets.Set[string], repos sets.Set[string]) {
