@@ -17,7 +17,6 @@ limitations under the License.
 package downwardapi
 
 import (
-	"os"
 	"reflect"
 	"testing"
 
@@ -265,7 +264,7 @@ func TestGetRevisionFromSpec(t *testing.T) {
 }
 
 func TestInCI(t *testing.T) {
-	os.Setenv("CI", "true")
+	t.Setenv("CI", "true")
 	if !InCI() {
 		t.Error("we expected InCI() to return true, but it returned false")
 	}

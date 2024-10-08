@@ -315,11 +315,9 @@ func TestCDToRootDir(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			curtDir, _ := os.Getwd()
-			curtBuildWorkspaceDir := os.Getenv(envName)
 			defer os.Chdir(curtDir)
-			defer os.Setenv(envName, curtBuildWorkspaceDir)
 
-			os.Setenv(envName, tc.buildWorkspaceDir)
+			t.Setenv(envName, tc.buildWorkspaceDir)
 			err := cdToRootDir()
 			if tc.expectError && err == nil {
 				t.Errorf("Expected to get an error but the result is nil")
