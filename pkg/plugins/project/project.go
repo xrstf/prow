@@ -139,11 +139,7 @@ func updateProjectNameToIDMap(projects []github.Project) {
 // processCommand processes the user command regex matches and returns the proposed project name,
 // proposed column name, whether the command is to remove issue/PR from project,
 // and the error message
-func processCommand(match string) (string, string, bool, string) {
-	proposedProject := ""
-	proposedColumnName := ""
-
-	var shouldClear = false
+func processCommand(match string) (proposedProject string, proposedColumnName string, shouldClear bool, err string) {
 	content := strings.TrimSpace(match)
 
 	// Take care of clear
@@ -168,8 +164,7 @@ func processCommand(match string) (string, string, bool, string) {
 		}
 	}
 	if len(validParts) == 0 || len(validParts) > 2 {
-		msg := invalidNumArgs
-		return "", "", false, msg
+		return "", "", false, invalidNumArgs
 	}
 
 	proposedProject = validParts[0]
@@ -177,7 +172,7 @@ func processCommand(match string) (string, string, bool, string) {
 		proposedColumnName = validParts[1]
 	}
 
-	return proposedProject, proposedColumnName, shouldClear, ""
+	return
 }
 
 func handle(gc githubClient, log *logrus.Entry, e *github.GenericCommentEvent, projectConfig plugins.ProjectConfig) error {

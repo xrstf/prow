@@ -186,7 +186,7 @@ func FetchArtifacts(
 	if err != nil {
 		return arts, fmt.Errorf("error parsing src: %w", err)
 	}
-	gcsKey := ""
+	var gcsKey string
 	switch keyType {
 	case api.ProwKeyType:
 		storageProvider, key, err := ProwToGCS(pjFetcher, cfg, key)

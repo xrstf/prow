@@ -37,7 +37,7 @@ func (s *Spyglass) ListArtifacts(ctx context.Context, src string) ([]string, err
 	if err != nil {
 		return []string{}, fmt.Errorf("error parsing src: %w", err)
 	}
-	gcsKey := ""
+	var gcsKey string
 	switch keyType {
 	case prowKeyType:
 		storageProvider, key, err := s.prowToGCS(key)
