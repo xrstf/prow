@@ -30,7 +30,6 @@ import (
 	"sigs.k8s.io/prow/pkg/bugzilla"
 	"sigs.k8s.io/prow/pkg/config"
 	"sigs.k8s.io/prow/pkg/config/secret"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	pluginsflagutil "sigs.k8s.io/prow/pkg/flagutil/plugins"
@@ -77,7 +76,7 @@ type options struct {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.bugzilla, &o.jira, &o.githubEnablement, &o.config, &o.pluginsConfig} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.bugzilla, &o.jira, &o.githubEnablement, &o.config, &o.pluginsConfig} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
@@ -94,7 +93,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Dry run for testing. Uses API tokens but does not mutate.")
 	fs.DurationVar(&o.gracePeriod, "grace-period", 180*time.Second, "On shutdown, try to handle remaining events for the specified duration. ")
 	o.pluginsConfig.PluginConfigPathDefault = "/etc/plugins/plugins.yaml"
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.bugzilla, &o.instrumentationOptions, &o.jira, &o.githubEnablement, &o.config, &o.pluginsConfig} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.bugzilla, &o.instrumentationOptions, &o.jira, &o.githubEnablement, &o.config, &o.pluginsConfig} {
 		group.AddFlags(fs)
 	}
 

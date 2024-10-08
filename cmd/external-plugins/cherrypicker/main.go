@@ -28,7 +28,6 @@ import (
 
 	"sigs.k8s.io/prow/pkg/config/secret"
 	"sigs.k8s.io/prow/pkg/flagutil"
-	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	"sigs.k8s.io/prow/pkg/interrupts"
 	"sigs.k8s.io/prow/pkg/logrusutil"
 	"sigs.k8s.io/prow/pkg/pjutil"
@@ -39,9 +38,9 @@ type options struct {
 	port int
 
 	dryRun                 bool
-	github                 prowflagutil.GitHubOptions
-	labels                 prowflagutil.Strings
-	instrumentationOptions prowflagutil.InstrumentationOptions
+	github                 flagutil.GitHubOptions
+	labels                 flagutil.Strings
+	instrumentationOptions flagutil.InstrumentationOptions
 	logLevel               string
 
 	webhookSecretFile string

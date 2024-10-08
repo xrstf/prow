@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/prow/pkg/config"
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -87,7 +86,7 @@ type options struct {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.storage, &o.config, &o.controllerManager} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.storage, &o.config, &o.controllerManager} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
@@ -95,7 +94,7 @@ func (o *options) Validate() error {
 	if o.providerName != "" && !sets.NewString(githubProviderName, gerritProviderName).Has(o.providerName) {
 		return errors.New("--provider should be github or gerrit")
 	}
-	var providerFlagGroup flagutil.OptionGroup = &o.github
+	var providerFlagGroup prowflagutil.OptionGroup = &o.github
 	if o.providerName == gerritProviderName {
 		providerFlagGroup = &o.gerrit
 	}
@@ -111,7 +110,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Whether to mutate any real-world state.")
 	fs.BoolVar(&o.runOnce, "run-once", false, "If true, run only once then quit.")
 	o.github.AddCustomizedFlags(fs, prowflagutil.DisableThrottlerOptions())
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.storage, &o.instrumentationOptions, &o.config, &o.gerrit} {
 		group.AddFlags(fs)
 	}
 	fs.IntVar(&o.syncThrottle, "sync-hourly-tokens", 800, "The maximum number of tokens per hour to be used by the sync controller.")

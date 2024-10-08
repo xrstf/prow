@@ -30,7 +30,6 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"sigs.k8s.io/prow/pkg/config"
 	"sigs.k8s.io/prow/pkg/crier/reporters/pubsub"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -56,7 +55,7 @@ type options struct {
 
 func (o *options) validate() error {
 	var errs []error
-	for _, group := range []flagutil.OptionGroup{&o.client, &o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.client, &o.github, &o.instrumentationOptions, &o.config} {
 		if err := group.Validate(o.dryRun); err != nil {
 			errs = append(errs, err)
 		}
@@ -71,7 +70,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Dry run for testing. Uses API tokens but does not mutate.")
 	fs.DurationVar(&o.gracePeriod, "grace-period", 180*time.Second, "On shutdown, try to handle remaining events for the specified duration. ")
 	fs.StringVar(&o.cookiefilePath, "cookiefile", "", "Path to git http.cookiefile, leave empty for github or anonymous")
-	for _, group := range []flagutil.OptionGroup{&o.client, &o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.client, &o.github, &o.instrumentationOptions, &o.config} {
 		group.AddFlags(fs)
 	}
 

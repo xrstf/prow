@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 
 	"sigs.k8s.io/prow/pkg/config/secret"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -64,7 +63,7 @@ type options struct {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.config} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
@@ -113,7 +112,7 @@ func gatherOptions() options {
 
 	fs.BoolVar(&o.skipReport, "skip-report", false, "Whether or not to ignore report with githubClient")
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Whether or not to make mutating API calls to GitHub/Kubernetes/Jenkins.")
-	for _, group := range []flagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.instrumentationOptions, &o.config} {
 		group.AddFlags(fs)
 	}
 	fs.Parse(os.Args[1:])

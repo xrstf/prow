@@ -55,7 +55,6 @@ import (
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	pkgFlagutil "sigs.k8s.io/prow/pkg/flagutil"
 	"sigs.k8s.io/prow/pkg/pjutil/pprof"
 	"sigs.k8s.io/yaml"
 
@@ -143,7 +142,7 @@ type options struct {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []pkgFlagutil.OptionGroup{&o.kubernetes, &o.github, &o.config, &o.pluginsConfig, &o.controllerManager} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.github, &o.config, &o.pluginsConfig, &o.controllerManager} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}

@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/prow/pkg/pjutil"
 
 	"sigs.k8s.io/prow/pkg/config/secret"
-	"sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/pluginhelp/externalplugins"
@@ -51,7 +50,7 @@ type options struct {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []flagutil.OptionGroup{&o.github} {
+	for _, group := range []prowflagutil.OptionGroup{&o.github} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
@@ -71,7 +70,7 @@ func gatherOptions() options {
 	fs.BoolVar(&o.dryRun, "dry-run", true, "Dry run for testing. Uses API tokens but does not mutate.")
 	fs.StringVar(&o.webhookSecretFile, "hmac-secret-file", "/etc/webhook/hmac", "Path to the file containing the GitHub HMAC secret.")
 	fs.StringVar(&o.prowURL, "prow-url", "", "Prow frontend URL.")
-	for _, group := range []flagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
+	for _, group := range []prowflagutil.OptionGroup{&o.github, &o.instrumentationOptions, &o.config} {
 		group.AddFlags(fs)
 	}
 	fs.Parse(os.Args[1:])

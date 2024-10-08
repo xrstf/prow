@@ -32,7 +32,6 @@ import (
 	prowapi "sigs.k8s.io/prow/pkg/apis/prowjobs/v1"
 	"sigs.k8s.io/prow/pkg/config"
 	"sigs.k8s.io/prow/pkg/cron"
-	pkgflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	prowflagutil "sigs.k8s.io/prow/pkg/flagutil"
 	configflagutil "sigs.k8s.io/prow/pkg/flagutil/config"
 	"sigs.k8s.io/prow/pkg/interrupts"
@@ -70,7 +69,7 @@ func gatherOptions(fs *flag.FlagSet, args ...string) options {
 }
 
 func (o *options) Validate() error {
-	for _, group := range []pkgflagutil.OptionGroup{&o.kubernetes, &o.config, &o.controllerManager} {
+	for _, group := range []prowflagutil.OptionGroup{&o.kubernetes, &o.config, &o.controllerManager} {
 		if err := group.Validate(o.dryRun); err != nil {
 			return err
 		}
