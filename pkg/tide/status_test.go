@@ -861,7 +861,7 @@ func TestExpectedStatus(t *testing.T) {
 				t.Fatalf("error calling expectedStatus(): %v", err)
 			}
 			if state != tc.state {
-				t.Errorf("Expected status state %q, but got %q.", string(tc.state), string(state))
+				t.Errorf("Expected status state %q, but got %q.", tc.state, state)
 			}
 			if desc != tc.desc {
 				t.Errorf("Expected status description %q, but got %q.", tc.desc, desc)

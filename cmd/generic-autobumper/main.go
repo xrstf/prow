@@ -467,7 +467,7 @@ func parseUpstreamImageVersion(upstreamAddress, prefix string) (string, error) {
 		return "", fmt.Errorf("error reading the response body: %w", err)
 	}
 	for _, line := range strings.Split(strings.TrimSuffix(string(body), "\n"), "\n") {
-		res := imageMatcher.FindStringSubmatch(string(line))
+		res := imageMatcher.FindStringSubmatch(line)
 		if len(res) > 2 && strings.Contains(res[1], prefix) {
 			return res[2], nil
 		}

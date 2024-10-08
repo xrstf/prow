@@ -135,7 +135,7 @@ func (cr catResult) Format() (string, error) {
 func (c *realClowder) URL(category string, movieCat bool) string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	uri := string(c.url)
+	uri := c.url
 	if category != "" {
 		uri += "&category=" + url.QueryEscape(category)
 	}
