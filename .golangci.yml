@@ -30,6 +30,7 @@ linters:
     - nolintlint
     - nosprintfhostport
     - staticcheck
+    - tenv
     - unused
   disable-all: true
 
