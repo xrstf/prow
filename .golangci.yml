@@ -33,6 +33,7 @@ linters:
     - tenv
     - unconvert
     - unused
+    - wastedassign
   disable-all: true
 
 issues:
